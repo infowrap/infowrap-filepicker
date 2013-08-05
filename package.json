@@ -1,0 +1,25 @@
+{
+  "name": "infowrap-filepicker",
+  "version": "0.0.0",
+  "description": "An Angular module that provides services and directives to work with Ink File Picker (https://www.inkfilepicker.com/)",
+  "homepage": "http://dev.infowrap.com/code/angular/angular-filepicker",
+  "repository": "",
+  "author": "Infowrap",
+  "license": "MIT",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://dev.infowrap.com/licenses/MIT.pdf"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.8.4"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.0",
+    "matchdep": "~0.1.2",
+    "grunt-karma": "~0.4.5",
+    "gitteh" : "git+https://github.com/infowrap/docular"
+  }
+}

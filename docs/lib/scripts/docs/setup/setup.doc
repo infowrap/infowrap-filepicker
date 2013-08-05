@@ -1,0 +1,95 @@
+@doc overview
+@name index
+@description
+
+##Setup
+
+ * Ink File Picker requires an api key. Sign up to get a free starter account <a href="https://developers.inkfilepicker.com/register/" target="_blank">here</a>.
+
+ * There's a couple ways you can get the module. Choose any one:
+    * Download `infowrap-filepicker` from <a href="http://infowrap.github.com/infowrap-filepicker/#download" target="_blank">the download page on the infowrap-filepicker web site</a>
+
+    * install with [Bower](http://bower.io/):
+
+            bower install infowrap-filepicker
+
+ * Include the script tag on your page after the AngularJS and jQuery script tags (infowrap-filepicker requires jQuery to run)
+
+        <script type='text/javascript' src='path/to/jquery.min.js'></script>
+        <script type='text/javascript' src='path/to/angular.min.js'></script>
+        <script type='text/javascript' src='path/to/infowrap-filepicker.min.js'></script>
+
+ * The module name is `infowrapFilepicker`
+
+ * Ensure that your application module specifies `infowrapFilepicker` as a dependency:
+
+        angular.module('yourApplication', ['infowrapFilepicker']);
+
+ * Use the directive, `filepicker-btn` as an attribute on any element to bring up the file picker modal.
+
+        <div class="btn btn-primary" filepicker-btn></div>
+
+ * But wait! ... It won't work quite yet because we need to configure the module. Check out 'Configuration'.
+
+ ###Continue Onward...
+
+<page-list></page-list>
+
+
+
+@doc overview
+@id configuration
+@name Configuration
+@description
+
+ * Configure the application via the config module:
+
+            angular.module('yourApplication', ['infowrapFilepicker']).
+                value("infowrapFilepicker.config",
+                    {
+                        apiKey: "Your API Key Here",
+                        iframeContainer: "filepicker-modal-container",
+                        pickOptions: {
+                          debug:false,
+                          container: 'filepicker-modal',
+                          maxSize: 2000 * 1024 * 1024,
+                          services: ['COMPUTER', 'FACEBOOK', 'DROPBOX', 'BOX', 'GMAIL', 'GOOGLE_DRIVE', 'IMAGE_SEARCH', 'URL', 'INSTAGRAM', 'EVERNOTE', 'FLICKR', 'FTP', 'GITHUB',  'PICASA', 'WEBCAM', 'WEBDAV']
+                        }
+                    }
+            );
+
+ * Configuration options explained:
+
+    * **apiKey**: (String|required) Paste your api key here that you got when you signed up for Ink File Picker. Can be found in the Developer Portal.
+    * **iframeContainer**: (String|optional) If you wish to use their iframe option and prefer to wrap their iframe inside a container for styling reasons, specify the DOM id of the container in your page.
+    * **pickOptions**: (Object|optional) Set defaults for the file picker modal. Some of these can be overridden by configuring the directive with options. You'll learn more about that in the next section, Directive Options.
+        * **debug**: (Boolean) Useful when developing, makes it so the pick onSuccess callback is fired immediately with dummy data.
+        * **container**: (String) When using the iframe option, this will be the DOM id of the actual iframe that will load the file picker modal.
+        * **maxSize**: (Number) max allowable size for uploads.
+        * **services**: (Array) services you want available in the file picker modal.
+
+<pager></pager>
+
+
+@doc overview
+@id directiveoptions
+@name Directive Options
+@description
+
+ * The provided directive `filepicker-btn` can be configured to override any of the default options by declaring the options via attributes.
+
+ * Do you need one part of your app to only allow a maxSize of 20MB vs. the default everywhere else of 2GB?
+
+            <div filepicker-btn max-size="20971520"></div>
+
+ * How about needing to limit the supported file types to just images in the picker?
+
+            <div filepicker-btn mime-types="image/*"></div>
+
+ * Full list of options:
+
+    * coming soon
+
+<pager></pager>
+
+
