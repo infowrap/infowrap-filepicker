@@ -11,6 +11,7 @@
     "examples",
     "lib",
     "docs",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "*.coffee"
   ]
 }
