@@ -10,6 +10,7 @@
     "tests",
     "examples",
     "lib",
-    "docs"
+    "docs",
+    "CHANGELOG.md"
   ]
 }
