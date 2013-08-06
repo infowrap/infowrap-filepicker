@@ -4,7 +4,7 @@
 
 ##Setup
 
- * Ink File Picker requires an api key. Sign up to get a free starter account <a href="https://developers.inkfilepicker.com/register/" target="_blank">here</a>.
+ * Usage of Ink File Picker requires an api key. Sign up <a href="https://developers.inkfilepicker.com/register/" target="_blank">here</a> to get a free starter account.
 
  * There's a couple ways you can get the module. Choose any one:
     * Download `infowrap-filepicker` from <a href="http://infowrap.github.com/infowrap-filepicker/#download" target="_blank">the download page on the infowrap-filepicker web site</a>
@@ -13,13 +13,22 @@
 
             bower install infowrap-filepicker
 
+ * This module has the following vendor dependencies:
+
+        * [lodash](http://lodash.com/)
+        * [jquery](http://jquery.com)
+        * [angular](http://angularjs.org)
+
+        ***Download and install into your project however you'd prefer. (Bower, direct download, etc.)***
+
  * Include the script tag on your page after the AngularJS and jQuery script tags (infowrap-filepicker requires jQuery to run)
 
+        <script type='text/javascript' src='path/to/lodash.min.js'></script>
         <script type='text/javascript' src='path/to/jquery.min.js'></script>
         <script type='text/javascript' src='path/to/angular.min.js'></script>
         <script type='text/javascript' src='path/to/infowrap-filepicker.min.js'></script>
 
- * The module name is `infowrapFilepicker`
+ * Take note the module name is `infowrapFilepicker`
 
  * Ensure that your application module specifies `infowrapFilepicker` as a dependency:
 
@@ -31,7 +40,7 @@
 
  * But wait! ... It won't work quite yet because we need to configure the module. Check out 'Configuration'.
 
- ###Continue Onward...
+ ###Continue ...
 
 <page-list></page-list>
 
@@ -49,10 +58,17 @@
                     {
                         apiKey: "Your API Key Here",
                         iframeContainer: "filepicker-modal-container",
+                        isMobile: $.browser.mobile,
+                        debugLogging: true,
+                        useSecurity: false,
+                        signApiUrl:function() {
+                          return "http://yourserver.com/v1/sign.json";
+                        },
                         pickOptions: {
                           debug:false,
                           container: 'filepicker-modal',
                           maxSize: 2000 * 1024 * 1024,
+                          isMobile: false,
                           services: ['COMPUTER', 'FACEBOOK', 'DROPBOX', 'BOX', 'GMAIL', 'GOOGLE_DRIVE', 'IMAGE_SEARCH', 'URL', 'INSTAGRAM', 'EVERNOTE', 'FLICKR', 'FTP', 'GITHUB',  'PICASA', 'WEBCAM', 'WEBDAV']
                         }
                     }
@@ -62,6 +78,10 @@
 
     * **apiKey**: (String|required) Paste your api key here that you got when you signed up for Ink File Picker. Can be found in the Developer Portal.
     * **iframeContainer**: (String|optional) If you wish to use their iframe option and prefer to wrap their iframe inside a container for styling reasons, specify the DOM id of the container in your page.
+    * **isMobile**: (Boolean|optional) Use your own browser/device detection here.
+    * **debugLogging**: (Boolean|optional) When enabled, you will see debug output in the console.
+    * **useSecurity**: (Boolean|optional) Turning this on requires you to check the `use security` option on in the Developer Portal with the file picker account you are using. Learn more on about security <a href="https://developers.inkfilepicker.com/docs/security/" target="_blank">here</a>. This will enable the signing hooks within the library to secure all api calls.
+    * **signApiUrl**: (Function|required when useSecurity:true) Provide your own backend api url here. This is a function in order to receive an object from the file picker security service to construct the api dynamically based on certain conditions.
     * **pickOptions**: (Object|optional) Set defaults for the file picker modal. Some of these can be overridden by configuring the directive with options. You'll learn more about that in the next section, Directive Options.
         * **debug**: (Boolean) Useful when developing, makes it so the pick onSuccess callback is fired immediately with dummy data.
         * **container**: (String) When using the iframe option, this will be the DOM id of the actual iframe that will load the file picker modal.

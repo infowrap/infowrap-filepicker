@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html ng-app="ExampleApp">
+  <head>
+    <title>infowrapFilepicker | The Angular Module for Ink File Picker | examples</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/bootstrap-glyphicons.css" rel="stylesheet" media="screen">
+    <link href="css/example.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar">
+      <a href="/" class="navbar-brand">infowrapFilepicker: The Angular Module for Ink File Picker</a>
+      <p class="navbar-text"></p>
+    </div>
+    <div class="container">
+      <p>Just a basic example showing you filepicker living in an Angular world.</p>
+      <p>Choose some files and check it out.</p>
+
+      <div
+        class="btn btn-primary"
+        data-filepicker-btn
+        data-preview-on-upload="true"
+        data-prevent-default="true">Choose ...</div>
+
+      <div class="container files">
+        <div class="file" data-ng-repeat="file in files">
+
+          <div class="preview">
+            <img data-ng-src="{{file.url}}" alt=""/>
+          </div>
+          <h5>{{file.filename}}</h5>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal-backdrop in"
+      data-ng-show="filepickerModalOpen"
+      data-ng-click="modalClose()"
+      ></div>
+    <div
+      id="filepicker-modal-container"
+      data-ng-show="filepickerModalOpen"
+      >
+      <a
+        class="glyphicon glyphicon-close"
+        data-ng-click="filepickerModalClose()"
+        ></a>
+      <iframe
+        id="filepicker-modal"
+        name="filepicker-modal"
+        frameborder="0"
+        marginwidth="0"
+        marginheight="0"
+        data-ng-show="filepickerModalOpen"
+        ></iframe>
+    </div>
+
+    <script type="text/javascript" src="vendor/js/lodash.min.js"></script>
+    <script type="text/javascript" src="vendor/js/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="vendor/js/angular.min.js"></script>
+    <script type="text/javascript" src="js/infowrap-filepicker.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+  </body>
+</html>

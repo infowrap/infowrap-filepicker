@@ -1,5 +1,15 @@
 angular.module("infowrapFilepicker.config", []).value("infowrapFilepicker.config", {})
 
+###*
+* @ngdoc module
+* @name infowrapFilepicker
+* @requires infowrapFilepicker.config
+* @description
+*
+* The primary module which needs to be injected into your application to provide filepicker services and directives.
+*
+###
+
 infowrapFilepicker = angular.module("infowrapFilepicker", ["infowrapFilepicker.config"])
 
 ###*
@@ -12,10 +22,10 @@ infowrapFilepicker = angular.module("infowrapFilepicker", ["infowrapFilepicker.c
 * @requires $timeout
 * @description
 *
-* FilepickerService is responsible for exposing filepicker's api to the angular world.
+* FilepickerService is responsible for exposing filepicker's api to your angular app.
 *
-* Currently, this service implements a basic subset of calls to provide the most common access.
-* However, we would like for this service to be configurable to implement only the api's you need/use.
+* Currently, only a basic subset of their api is implemented.
+* However, in the future we would like for this service to be configurable to implement only the api's you need/use.
 *
 * Feel free to issue a pull request if you find yourself motivated to flush out all the implementations.
 * For a complete list of filepicker api calls, see <a href="https://developers.inkfilepicker.com/docs/web/" target="_blank">filepicker's documentation</a>.
@@ -24,13 +34,31 @@ infowrapFilepicker = angular.module("infowrapFilepicker", ["infowrapFilepicker.c
 
 infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.config", "infowrapFilepickerSecurity", "$log", "$window", "$q", "$rootScope", "$timeout", (config, fps, $log, $window, $q, $rootScope, $timeout) ->
 
-  $rootScope.safeApply = (fn) ->
-    # ensure angular knows about filepickers callbacks
-    phase = this.$root.$$phase
-    if phase isnt "$apply" and phase isnt "$digest"
-      $rootScope.$apply(fn)
-
   api = {}
+
+  ###*
+  * @doc method
+  * @name infowrapFilepicker.service:infowrapFilepickerService#loadFilepicker
+  * @methodOf infowrapFilepicker.service:infowrapFilepickerService
+  * @description
+  *
+  * Loads the filepicker javascript library.
+  *
+  * @returns {object} promise - gets resolved when filepicker library is loaded
+  *
+  ###
+  api.loadFilepicker = ->
+    defer = $q.defer()
+    $('body').append('<script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>')
+    checkIfLoaded = ->
+      if _.isUndefined($window.filepicker)
+        $timeout ->
+          checkIfLoaded()
+        , 50
+      else
+        defer.resolve()
+    checkIfLoaded()
+    defer.promise
 
   ###*
   * @doc method
@@ -45,7 +73,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
   *
   ###
   api.log = (msg, type) ->
-    if config.debug
+    if config.debugLogging
       if type
         $log[type](msg)
       else
@@ -57,12 +85,22 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
   apiMethods = ["pick", "pickAndStore", "exportFile", "read", "stat", "write", "writeUrl", "store", "convert", "remove"]
 
   # helper events
-  helperEvents = ["dialogOpen", "pickedFiles", "error", "hideStatus", "readingFiles", "readingFilesComplete", "readVCard", "readProgress", "resetFilesUploading", "progress", "statusInit", "storeProgress", "writeUrlProgress", "uploadProgress", "uploadsComplete", "dropTargetFieldReady"]
+  helperEvents = ["pickedFiles", "error", "readingFiles", "readingFilesComplete", "readVCard", "readProgress", "resetFilesUploading", "progress", "storeProgress", "writeUrlProgress", "uploadProgress", "uploadsComplete"]
+
+  # combine api and helper events for processing
   allEvents = apiMethods.concat(helperEvents)
 
+  # modal events
+  modalEvents = ["close"]
+  api.events.modal = {}
+  _.forEach modalEvents, (event) ->
+    api.events.modal[event] = "#{eventPrefix}:modal:" + event
+
   # standardize event names
+  # uniquely identify event names with prefix
+  eventPrefix = "infowrapFilepicker"
   _.forEach allEvents, (event) ->
-    api.events[event] = "filepicker:" + event
+    api.events[event] = "#{eventPrefix}:" + event
 
     # build service interface
     if _.contains(apiMethods, event)
@@ -101,21 +139,24 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
     # only used when FilePickerIO.config provides a value for 'iframeContainer'
     if config.iframeContainer
       $iframeContainer = $("##{config.iframeContainer}")
-      if BizBuilt.platform.IS_MOBILE
+      if config.isMobile
         # fill entire viewport on mobile
         top = left = 0
         width = height = '100%'
       else
-        screenSize = BizBuilt.util.detectScreenSize()
+        w = $($window).outerWidth(true)
+        h = $($window).outerHeight(true)
+        width = "#{w}px"
+        height = "#{h}px"
         top = 50
-        left = screenSize.width/2 - $iframeContainer.width()/2
+        left = w/2 - $iframeContainer.width()/2
         if left < 0
           # if negative, make flush left
           left = 0
       positionSettings =
         top:"#{top}px"
         left:"#{left}px"
-      _.extend(positionSettings, {width:width, height:height}) if BizBuilt.platform.IS_MOBILE
+      _.extend(positionSettings, {width:width, height:height}) if config.isMobile
       $iframeContainer.css(positionSettings)
 
   ###*
@@ -130,16 +171,16 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
   *
   ###
   api.modalToggle = (force) ->
-    enabled = if _.isNothing(force) then not $rootScope.filepickerModalOpen else force
+    enabled = if _.isUndefined(force) then not $rootScope.filepickerModalOpen else force
     $rootScope.filepickerModalOpen = enabled
-    safeApply()
+    $rootScope.safeApply()
 
     handleEscapeKey = (e) ->
       if e.which is 27
         e.preventDefault()
         if $rootScope.filepickerModalOpen
           # toggle modal off when hitting ESC, only if it's actually open
-          safeApply ->
+          $rootScope.safeApply ->
             api.modalToggle(false)
 
     handleModalPosition = (e) ->
@@ -152,7 +193,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
       $timeout ->
         # always ensure window is scrolled to top when this modal appears
         $($window).scrollTop(0)
-      , if BizBuilt.platform.IS_MOBILE then 300 else 0
+      , if config.isMobile then 300 else 0
     else
       $('body').unbind('keydown', handleEscapeKey)
       $($window).unbind('resize', handleModalPosition)
@@ -183,13 +224,13 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
     api.modalToggle(true)
 
     onSuccess = (fpfiles) ->
-      safeApply ->
+      $rootScope.safeApply ->
         api.modalToggle(false)
         defer.resolve(fpfiles)
 
     onError = (fperror) ->
       api.log(fperror)
-      safeApply ->
+      $rootScope.safeApply ->
         api.modalToggle(false)
         defer.reject(fperror)
 
@@ -220,13 +261,13 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
     api.modalToggle(true)
 
     onSuccess = (fpfiles) ->
-      safeApply ->
+      $rootScope.safeApply ->
         api.modalToggle(false)
         defer.resolve(fpfiles)
 
     onError = (fperror) ->
       api.log(fperror)
-      safeApply ->
+      $rootScope.safeApply ->
         api.modalToggle(false)
         defer.reject(fperror)
 
@@ -255,12 +296,12 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
     api.log(cleanUrl)
 
     filepicker.writeUrl targetFpFile, cleanUrl, opt, (fpfile) ->
-      safeApply ->
+      $rootScope.safeApply ->
         defer.resolve(fpfile)
 
     , (fperror) ->
       api.log(fperror)
-      safeApply ->
+      $rootScope.safeApply ->
         defer.reject(fperror)
 
     defer.promise
@@ -292,18 +333,18 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
 
       filepicker.store input, options, (data) ->
         _.extend(result, data: data)
-        safeApply ->
+        $rootScope.safeApply ->
           defer.resolve(result)
 
       , (fperror) ->
         api.log(fperror)
         _.extend(result, error: fperror)
-        safeApply ->
+        $rootScope.safeApply ->
           defer.reject(result)
 
       , (percent) ->
         _.extend(result, progress: percent)
-        safeApply ->
+        $rootScope.safeApply ->
           $rootScope.$broadcast(api.events.storeProgress, result)
 
     # check if a cached policy already exist for this
@@ -342,12 +383,12 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
       # fps.secureForReading([input], {id:true}).then (result) ->
       #   api.log(result)
       filepicker.exportFile input.url.url, opt, (data) ->
-        safeApply ->
+        $rootScope.safeApply ->
           defer.resolve(data)
 
       , (fperror) ->
         api.log(fperror)
-        safeApply ->
+        $rootScope.safeApply ->
           defer.reject(fperror)
 
     defer.promise
@@ -383,17 +424,17 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
       filepicker.read url, opt, (data) ->
         data = "data:image/png;base64,#{data}" if usingImage
         _.extend(result, data: data)
-        safeApply ->
+        $rootScope.safeApply ->
           defer.resolve(result)
           $rootScope.$broadcast(api.events.read, result)
       , (fperror) ->
         api.log(fperror)
         _.extend(result, error: fperror)
-        safeApply ->
+        $rootScope.safeApply ->
           defer.reject(result)
       , (percent) ->
         _.extend(result, progress: percent)
-        safeApply ->
+        $rootScope.safeApply ->
           $rootScope.$broadcast(api.events.readProgress, result)
 
     getUrlToReadFrom = (input, options) ->
@@ -531,7 +572,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
         readFile()
 
     # this safeApply is CRITICAL! do not remove! ... or be a lost soul on a lonely island!
-    safeApply()
+    $rootScope.safeApply()
 
 
   api.addToFilesUploading = (files) ->
@@ -584,9 +625,6 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
     api.uploadProgressStyle =
       width: "0px"
     api.filesUploading = api.filesUploaded = []
-    # must check for existence due to 'run' phase of some modules during application initialization
-    $rootScope.safeApply() if $rootScope.safeApply
-    return
 
   api.resetFileStatus() # call reset status to initialize properties
 
@@ -598,6 +636,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
 * @ngdoc object
 * @name infowrapFilepicker.service:infowrapFilepickerSecurity
 * @requires infowrapFilepickerService
+* @requires $log
 * @requires $q
 * @requires $rootScope
 * @requires $http
@@ -605,12 +644,12 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
 *
 * FilepickerSecurity is an implementation of the security signing scheme devised by the Filepicker team.
 *
-* This security signing is setup to work directly with our open source ruby gem, <a href="https://github.com/infowrap/filepicker_client" target="_blank">filepicker_client</a>.
+* This security signing is setup to work directly with our ruby gem, <a href="https://github.com/infowrap/filepicker_client" target="_blank">filepicker_client</a>.
 *
 *
 ###
 
-infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.config", "infowrapFilepickerService", "$q", "$rootScope", "$http", (config, fp, $q, $rootScope, $http) ->
+infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.config", "$log", "$q", "$rootScope", "$http", (config, $log, $q, $rootScope, $http) ->
   # security for filepicker
 
   signingInProcess = false # helps avoid multiple signing calls at once
@@ -668,11 +707,12 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
     unless signingInProcess
       # prevent multiple simultaneous signing calls (can happen on page load)
       signingInProcess = true
-      $http.post("#{BizBuilt.uri.apiServer}wraps/#{opt.projectId}/file_assets/sign.json", signage).success((result) ->
+      $http.post(config.signApiUrl(opt.projectId), signage).success((result) ->
         signingInProcess = false
         # cache the policy for the appropriate operation sets
-        fp.log("--- filepicker security sign ---")
-        fp.log(signage.options.call)
+        if config.debugLogging
+          $log.log("--- filepicker security sign ---")
+          $log.log(signage.options.call)
 
         if opt.new
           api.cachedPolicies.new = result
@@ -683,7 +723,8 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
           signingInProcess = false
           # TODO: should probably handle these errors in a standard way
           if result.error is 'filenotfound'
-            fp.log(result.error)
+            if config.debugLogging
+              $log.log(result.error)
 
           defer.reject(result.error)
 
@@ -731,13 +772,25 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
   api
 ])
 
-infowrapFilepicker.run(["infowrapFilepicker.config", 'infowrapFilepickerService', '$rootScope', (config, fp, $rootScope) ->
+infowrapFilepicker.run(["infowrapFilepicker.config", 'infowrapFilepickerService', '$rootScope', '$window', (config, fp, $rootScope, $window) ->
+
+  # Your code may already implement this
+  $rootScope.safeApply = (fn) ->
+    # ensure angular knows about filepickers callbacks
+    phase = this.$root.$$phase
+    if phase is "$apply" or phase is "$digest"
+      if fn
+        $rootScope.$eval(fn)
+    else if fn
+      $rootScope.$apply(fn)
+    else
+      $rootScope.$apply()
 
   if config.apiKey
-    filepicker.setKey(config.apiKey)
+    fp.loadFilepicker().then ->
+      $window.filepicker.setKey(config.apiKey)
   else
     fp.log("apiKey is required!", "error")
-    fp.log("Configure like this: yourmodule.value('infowrapFilepicker.config', { apiKey: 'yourApiKey'})", "error")
 
   $rootScope.filepickerModalOpen = false
 
@@ -748,7 +801,7 @@ infowrapFilepicker.run(["infowrapFilepicker.config", 'infowrapFilepickerService'
     # always reset on route change
     fp.modalToggle(false)
 
-  $rootScope.$on BizBuilt.scope.events.modal.backdropclick, () ->
+  $rootScope.$on fp.events.modal.close, () ->
     # backdrop click - close filepicker modal
     fp.modalToggle(false)
 ])
@@ -788,14 +841,13 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
           dispatchPickedFiles = (files) ->
             $rootScope.$broadcast(fp.events.pickedFiles, files, scope.targetType)
 
-          if scope.ignoreReadSigning is 'true'
-            # in some cases where the controller is handling read explicitly, just disable default read signing
-            # because calling read explicitly will handle the signing itself
-            dispatchPickedFiles(fpfiles)
-          else
+          if config.useSecurity
             # security is enabled by default
             # must handle security for these picked files (because we cannot read a file that is not secured)
             fps.secureForReading(fpfiles).then(dispatchPickedFiles)
+          else
+            dispatchPickedFiles(fpfiles)
+
 
       else if scope.storeLocation
         $rootScope.$broadcast fp.events.store,
@@ -809,12 +861,15 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
 
       showPickDialog = () ->
 
-        # assign signed policy first
-        newPolicy = fps.cachedPolicies.new
-        options =
-          policy: newPolicy.encoded_policy
-          signature: newPolicy.signature
-          path:newPolicy.policy.path
+        if config.useSecurity
+          # assign signed policy first
+          newPolicy = fps.cachedPolicies.new
+          options =
+            policy: newPolicy.encoded_policy
+            signature: newPolicy.signature
+            path:newPolicy.policy.path
+        else
+          options = {}
 
         # handle options passed in via the directive
         _.extend(options, {mimetypes: scope.mimeTypes.split(',')}) if scope.mimeTypes
@@ -834,16 +889,19 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
         else
           fp.pick(options).then(pickedFiles)
 
-      # check if a cached policy already exist for this
-      if fps.hasCachedPolicy({new:true})
-        showPickDialog()
-      else
-        # no cached policy, sign to get one
-        signOptions =
-          new:true
-          projectId:scope.targetParentId
-        fps.sign(signOptions).then ->
+      if config.useSecurity
+        # check if a cached policy already exist for this
+        if fps.hasCachedPolicy({new:true})
           showPickDialog()
+        else
+          # no cached policy, sign to get one
+          signOptions =
+            new:true
+            projectId:scope.targetParentId
+          fps.sign(signOptions).then ->
+            showPickDialog()
+      else
+        showPickDialog()
 
   restrict: "A"
   scope:
@@ -868,7 +926,7 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
 
   replace: true
   transclude:true
-  template: "<div data-ng-click='pick($event)' data-ng-transclude></div>"
+  template: "<div data-ng-click='pick($event)'><div data-ng-transclude></div></div>"
   link: link
 
 ])
