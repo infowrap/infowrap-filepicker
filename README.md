@@ -4,7 +4,7 @@ This frontend module was designed to work specifically with our [filepicker_clie
 
 Learn more about Ink File Picker [here](https://www.inkfilepicker.com/)
 
-This project is currently in `Alpha`. 
+This project is currently in `Alpha`.
 
 Pull requests are certainly welcome.
 
@@ -13,3 +13,4 @@ Pull requests are certainly welcome.
 ```
 	npm install
 ```
+
