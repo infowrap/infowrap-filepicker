@@ -91,6 +91,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
       }
     };
     api.events = {};
+    eventPrefix = "infowrapFilepicker";
     apiMethods = ["pick", "pickAndStore", "exportFile", "read", "stat", "write", "writeUrl", "store", "convert", "remove"];
     helperEvents = ["pickedFiles", "error", "readingFiles", "readingFilesComplete", "readVCard", "readProgress", "resetFilesUploading", "progress", "storeProgress", "writeUrlProgress", "uploadProgress", "uploadsComplete"];
     allEvents = apiMethods.concat(helperEvents);
@@ -99,7 +100,6 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
     _.forEach(modalEvents, function(event) {
       return api.events.modal[event] = ("" + eventPrefix + ":modal:") + event;
     });
-    eventPrefix = "infowrapFilepicker";
     _.forEach(allEvents, function(event) {
       api.events[event] = ("" + eventPrefix + ":") + event;
       if (_.contains(apiMethods, event)) {

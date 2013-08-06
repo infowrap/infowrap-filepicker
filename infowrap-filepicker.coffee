@@ -81,6 +81,10 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
 
   api.events = {}
 
+  # standardize event names
+  # uniquely identify event names with prefix
+  eventPrefix = "infowrapFilepicker"
+
   # should match filepicker's api methods
   apiMethods = ["pick", "pickAndStore", "exportFile", "read", "stat", "write", "writeUrl", "store", "convert", "remove"]
 
@@ -96,9 +100,6 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
   _.forEach modalEvents, (event) ->
     api.events.modal[event] = "#{eventPrefix}:modal:" + event
 
-  # standardize event names
-  # uniquely identify event names with prefix
-  eventPrefix = "infowrapFilepicker"
   _.forEach allEvents, (event) ->
     api.events[event] = "#{eventPrefix}:" + event
 
