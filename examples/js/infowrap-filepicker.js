@@ -2,6 +2,17 @@ var infowrapFilepicker;
 
 angular.module("infowrapFilepicker.config", []).value("infowrapFilepicker.config", {});
 
+/**
+* @ngdoc module
+* @name infowrapFilepicker
+* @requires infowrapFilepicker.config
+* @description
+*
+* The primary module which needs to be injected into your application to provide filepicker services and directives.
+*
+*/
+
+
 infowrapFilepicker = angular.module("infowrapFilepicker", ["infowrapFilepicker.config"]);
 
 /**
@@ -696,7 +707,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
 *
 * FilepickerSecurity is an implementation of the security signing scheme devised by the Filepicker team.
 *
-* This security signing is setup to work directly with our open source ruby gem, <a href="https://github.com/infowrap/filepicker_client" target="_blank">filepicker_client</a>.
+* This security signing is setup to work directly with our ruby gem, <a href="https://github.com/infowrap/filepicker_client" target="_blank">filepicker_client</a>.
 *
 *
 */

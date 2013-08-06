@@ -1,5 +1,5 @@
 var path = require('path');
-testHarnessFiles = require(path.resolve('./FileList.js')).files
+testHarnessFiles = require(path.resolve('../../lib/FileList.js')).files
 
 basePath = '../../';
 files = []
