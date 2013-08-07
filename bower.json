@@ -1,6 +1,6 @@
 {
   "name": "infowrap-filepicker",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "infowrap-filepicker.js",
   "ignore": [
     "**/.*",
@@ -11,6 +11,7 @@
     "examples",
     "lib",
     "docs",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "*.coffee"
   ]
 }
