@@ -1013,7 +1013,7 @@ infowrapFilepicker.directive("filepickerBtn", [
       },
       replace: true,
       transclude: true,
-      template: "<div data-ng-click='pick($event)'><div data-ng-transclude></div></div>",
+      template: "<div data-ng-click='pick($event)' data-ng-transclude></div>",
       link: link
     };
   }
