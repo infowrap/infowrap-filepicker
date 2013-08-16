@@ -6,8 +6,6 @@ Learn more about Ink File Picker [here](https://www.inkfilepicker.com/)
 
 This project is currently in `Alpha`.
 
-Pull requests are certainly welcome.
-
 ##Setup
 
 ```
