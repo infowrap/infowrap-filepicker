@@ -225,7 +225,6 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
       defer = $q.defer();
       opt = preparePickOptions(opt);
       api.log(opt);
-      api.positionModal();
       api.modalToggle(true);
       onSuccess = function(fpfiles) {
         return $rootScope.safeApply(function() {
@@ -245,6 +244,9 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
       } else {
         filepicker.pick(opt, onSuccess, onError);
       }
+      $timeout(function() {
+        return api.positionModal();
+      }, 0);
       return defer.promise;
     };
     /**
@@ -263,7 +265,6 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
       defer = $q.defer();
       opt = preparePickOptions(opt);
       api.log(opt);
-      api.positionModal();
       api.modalToggle(true);
       onSuccess = function(fpfiles) {
         return $rootScope.safeApply(function() {
@@ -283,6 +284,9 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
         path: opt.path
       };
       filepicker.pickAndStore(opt, storeOptions, onSuccess, onError);
+      $timeout(function() {
+        return api.positionModal();
+      }, 0);
       return defer.promise;
     };
     /**

@@ -221,7 +221,6 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
     api.log(opt)
 
     # show modal
-    api.positionModal()
     api.modalToggle(true)
 
     onSuccess = (fpfiles) ->
@@ -239,6 +238,12 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
       filepicker.pickMultiple(opt, onSuccess, onError)
     else
       filepicker.pick(opt, onSuccess, onError)
+
+    # post evaluate modal positioning
+    $timeout ->
+      # important that this is evaluated after angular has digested everything
+      api.positionModal()
+    , 0
 
     defer.promise
 
@@ -258,7 +263,6 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
     api.log(opt)
 
     # show modal
-    api.positionModal()
     api.modalToggle(true)
 
     onSuccess = (fpfiles) ->
@@ -277,6 +281,12 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
       path:opt.path
 
     filepicker.pickAndStore(opt, storeOptions, onSuccess, onError)
+
+    # post evaluate modal positioning
+    $timeout ->
+      # important that this is evaluated after angular has digested everything
+      api.positionModal()
+    , 0
 
     defer.promise
 
