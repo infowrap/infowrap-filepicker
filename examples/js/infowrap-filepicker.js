@@ -996,7 +996,6 @@ infowrapFilepicker.directive("filepickerBtn", [
     return {
       restrict: "A",
       scope: {
-        "class": "@",
         closeModalOnOpen: "@",
         btnClass: "@",
         dragAndDrop: "@",
@@ -1017,7 +1016,7 @@ infowrapFilepicker.directive("filepickerBtn", [
       },
       replace: true,
       transclude: true,
-      template: "<div data-ng-click='pick($event)' data-ng-transclude></div>",
+      template: "<div data-ng-transclude></div>",
       link: link
     };
   }
