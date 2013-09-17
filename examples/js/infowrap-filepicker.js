@@ -375,7 +375,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
       } else {
         signOptions = {
           "new": true,
-          projectId: opt.wrapId
+          wrapId: opt.wrapId
         };
         fps.sign(signOptions).then(function() {
           return storeFile();
@@ -777,10 +777,10 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
           file_size: opt.size
         });
       }
-      opt.projectId = opt.projectId || $rootScope.currentProject.id;
+      opt.wrapId = opt.wrapId || $rootScope.activeWrap.id;
       if (!signingInProcess) {
         signingInProcess = true;
-        $http.post(config.signApiUrl(opt.projectId), signage).success(function(result) {
+        $http.post(config.signApiUrl(opt.wrapId), signage).success(function(result) {
           signingInProcess = false;
           if (config.debugLogging) {
             $log.log("--- filepicker security sign ---");
@@ -982,7 +982,7 @@ infowrapFilepicker.directive("filepickerBtn", [
           } else {
             signOptions = {
               "new": true,
-              projectId: scope.targetParentId
+              wrapId: scope.targetParentId
             };
             return fps.sign(signOptions).then(function() {
               return showPickDialog();
