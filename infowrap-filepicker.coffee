@@ -365,7 +365,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
       # no cached policy, sign to get one
       signOptions =
         new:true
-        projectId:opt.wrapId
+        wrapId:opt.wrapId
       fps.sign(signOptions).then ->
         storeFile()
 
@@ -713,12 +713,12 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
     # must strip the filepicker id off the end of the handle
     _.extend(signage.options, {handle:opt.handle.substr(opt.handle.lastIndexOf('/') + 1)}) if opt.handle
     _.extend(signage.options, {file_size:opt.size}) if opt.size
-    opt.projectId = opt.projectId or $rootScope.currentProject.id # default to currentProject
+    opt.wrapId = opt.wrapId or $rootScope.activeWrap.id # default to activeWrap
 
     unless signingInProcess
       # prevent multiple simultaneous signing calls (can happen on page load)
       signingInProcess = true
-      $http.post(config.signApiUrl(opt.projectId), signage).success((result) ->
+      $http.post(config.signApiUrl(opt.wrapId), signage).success((result) ->
         signingInProcess = false
         # cache the policy for the appropriate operation sets
         if config.debugLogging
@@ -908,7 +908,7 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
           # no cached policy, sign to get one
           signOptions =
             new:true
-            projectId:scope.targetParentId
+            wrapId:scope.targetParentId
           fps.sign(signOptions).then ->
             showPickDialog()
       else
