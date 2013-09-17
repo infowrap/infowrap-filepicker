@@ -132,15 +132,17 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
     */
 
     api.positionModal = function() {
-      var $iframeContainer, h, height, left, positionSettings, top, w, width;
+      var $iframeContainer, $win, h, height, left, positionSettings, top, w, width;
       if (config.iframeContainer) {
         $iframeContainer = $("#" + config.iframeContainer);
+        $win = angular.element($window);
+        h = $win.outerHeight(true);
         if (config.isMobile) {
           top = left = 0;
-          width = height = '100%';
+          width = '100%';
+          height = "" + (h + 60) + "px";
         } else {
-          w = $($window).outerWidth(true);
-          h = $($window).outerHeight(true);
+          w = $win.outerWidth(true);
           width = "" + w + "px";
           height = "" + h + "px";
           top = 50;
@@ -175,7 +177,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
     */
 
     api.modalToggle = function(force) {
-      var enabled, handleEscapeKey, handleModalPosition;
+      var $body, $win, enabled, handleEscapeKey, handleModalPosition;
       enabled = _.isUndefined(force) ? !$rootScope.filepickerModalOpen : force;
       $rootScope.filepickerModalOpen = enabled;
       $rootScope.safeApply();
@@ -194,15 +196,17 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
           return api.positionModal();
         }
       };
+      $body = angular.element('body');
+      $win = angular.element($window);
       if (enabled) {
-        $('body').bind('keydown', handleEscapeKey);
-        $($window).bind('resize', handleModalPosition);
+        $body.bind('keydown', handleEscapeKey);
+        $win.bind('resize', handleModalPosition);
         return $timeout(function() {
-          return $($window).scrollTop(0);
+          return $win.scrollTop(0);
         }, config.isMobile ? 300 : 0);
       } else {
-        $('body').unbind('keydown', handleEscapeKey);
-        return $($window).unbind('resize', handleModalPosition);
+        $body.unbind('keydown', handleEscapeKey);
+        return $win.unbind('resize', handleModalPosition);
       }
     };
     /**

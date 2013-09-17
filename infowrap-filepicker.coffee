@@ -140,13 +140,15 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
     # only used when FilePickerIO.config provides a value for 'iframeContainer'
     if config.iframeContainer
       $iframeContainer = $("##{config.iframeContainer}")
+      $win = angular.element($window)
+      h = $win.outerHeight(true)
       if config.isMobile
         # fill entire viewport on mobile
         top = left = 0
-        width = height = '100%'
+        width = '100%'
+        height = "#{h + 60}px" # add address bar
       else
-        w = $($window).outerWidth(true)
-        h = $($window).outerHeight(true)
+        w = $win.outerWidth(true)
         width = "#{w}px"
         height = "#{h}px"
         top = 50
@@ -188,16 +190,18 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
       if $rootScope.filepickerModalOpen
         api.positionModal()
 
+    $body = angular.element('body')
+    $win = angular.element($window)
     if enabled
-      $('body').bind('keydown', handleEscapeKey)
-      $($window).bind('resize', handleModalPosition)
+      $body.bind('keydown', handleEscapeKey)
+      $win.bind('resize', handleModalPosition)
       $timeout ->
         # always ensure window is scrolled to top when this modal appears
-        $($window).scrollTop(0)
+        $win.scrollTop(0)
       , if config.isMobile then 300 else 0
     else
-      $('body').unbind('keydown', handleEscapeKey)
-      $($window).unbind('resize', handleModalPosition)
+      $body.unbind('keydown', handleEscapeKey)
+      $win.unbind('resize', handleModalPosition)
 
 
 
