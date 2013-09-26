@@ -334,18 +334,17 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
     */
 
     api.store = function(input, opt) {
-      var defer, signOptions, storeFile;
+      var cachedPolicy, defer, signOptions, storeFile;
       defer = $q.defer();
-      storeFile = function() {
-        var newPolicy, options, result;
+      storeFile = function(signedPolicy) {
+        var options, result;
         result = {
           input: input
         };
-        newPolicy = fps.cachedPolicies["new"];
         options = {
-          policy: newPolicy.encoded_policy,
-          signature: newPolicy.signature,
-          path: newPolicy.policy.path,
+          policy: signedPolicy.encoded_policy,
+          signature: signedPolicy.signature,
+          path: signedPolicy.policy.path,
           location: 'S3'
         };
         return filepicker.store(input, options, function(data) {
@@ -372,17 +371,18 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
           });
         });
       };
-      if (fps.hasCachedPolicy({
+      cachedPolicy = fps.getCachedPolicy({
         "new": true
-      })) {
-        storeFile();
+      });
+      if (cachedPolicy) {
+        storeFile(cachedPolicy);
       } else {
         signOptions = {
           "new": true,
           wrapId: opt.wrapId
         };
-        fps.sign(signOptions).then(function() {
-          return storeFile();
+        fps.sign(signOptions).then(function(signedPolicy) {
+          return storeFile(signedPolicy);
         });
       }
       return defer.promise;
@@ -742,7 +742,7 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
       "new": ['pick', 'store', 'storeUrl'],
       existing: ['read', 'stat', 'convert', 'write', 'writeUrl']
     };
-    api.hasCachedPolicy = function(opt) {
+    api.getCachedPolicy = function(opt) {
       var cachedPolicy, isCached, operations, rightNowEpoch;
       opt = opt || {};
       if (_.isUndefined(opt.signType)) {
@@ -760,7 +760,9 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
         });
         if (isCached && cachedPolicy.policy.expiry) {
           rightNowEpoch = Math.floor(new Date().getTime() / 1000);
-          return rightNowEpoch <= Number(cachedPolicy.policy.expiry);
+          if (rightNowEpoch <= Number(cachedPolicy.policy.expiry)) {
+            return cachedPolicy;
+          }
         }
       }
       return false;
@@ -797,7 +799,7 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
       if (!signingInProcess) {
         signingInProcess = true;
         $http.post(config.signApiUrl(opt.resourceId, opt.signType), signage).success(function(result) {
-          var updateSignTypePolicy;
+          var getSignedPolicy, updateSignTypePolicy;
           signingInProcess = false;
           if (config.debugLogging) {
             $log.log("--- filepicker security sign ---");
@@ -811,20 +813,22 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
             }
             return api.cachedPolicies.types[opt.signType][opt["new"] ? 'new' : 'existing'] = result;
           };
-          if (opt["new"]) {
-            if (_.isUndefined(opt.signType)) {
-              api.cachedPolicies["new"] = result;
+          getSignedPolicy = function() {
+            if (opt["new"]) {
+              if (_.isUndefined(opt.signType)) {
+                return api.cachedPolicies["new"] = result;
+              } else {
+                return updateSignTypePolicy();
+              }
             } else {
-              updateSignTypePolicy();
+              if (_.isUndefined(opt.signType)) {
+                return api.cachedPolicies.existing = result;
+              } else {
+                return updateSignTypePolicy();
+              }
             }
-          } else {
-            if (_.isUndefined(opt.signType)) {
-              api.cachedPolicies.existing = result;
-            } else {
-              updateSignTypePolicy();
-            }
-          }
-          return defer.resolve();
+          };
+          return defer.resolve(getSignedPolicy());
         }).error(function(result) {
           signingInProcess = false;
           if (result.error === 'filenotfound') {
@@ -979,15 +983,14 @@ infowrapFilepicker.directive("filepickerBtn", [
         return $rootScope.safeApply();
       };
       return scope.pick = function(e) {
-        var hasCachedPolicyOptions, showPickDialog, signOptions;
-        showPickDialog = function() {
-          var newPolicy, options, pickedFiles;
+        var cachedPolicy, cachedPolicyOptions, showPickDialog, signOptions;
+        showPickDialog = function(signedPolicy) {
+          var options, pickedFiles;
           if (config.useSecurity) {
-            newPolicy = fps.cachedPolicies["new"];
             options = {
-              policy: newPolicy.encoded_policy,
-              signature: newPolicy.signature,
-              path: newPolicy.policy.path
+              policy: signedPolicy.encoded_policy,
+              signature: signedPolicy.signature,
+              path: signedPolicy.policy.path
             };
           } else {
             options = {};
@@ -1023,12 +1026,13 @@ infowrapFilepicker.directive("filepickerBtn", [
           }
         };
         if (config.useSecurity) {
-          hasCachedPolicyOptions = {
+          cachedPolicyOptions = {
             "new": true,
             signType: scope.signType
           };
-          if (fps.hasCachedPolicy(hasCachedPolicyOptions)) {
-            return showPickDialog();
+          cachedPolicy = fps.getCachedPolicy(cachedPolicyOptions);
+          if (cachedPolicy) {
+            return showPickDialog(cachedPolicy);
           } else {
             signOptions = {
               "new": true,
@@ -1036,8 +1040,8 @@ infowrapFilepicker.directive("filepickerBtn", [
               signType: scope.signType,
               signTypeResourceId: scope.signTypeResourceId
             };
-            return fps.sign(signOptions).then(function() {
-              return showPickDialog();
+            return fps.sign(signOptions).then(function(signedPolicy) {
+              return showPickDialog(signedPolicy);
             });
           }
         } else {
