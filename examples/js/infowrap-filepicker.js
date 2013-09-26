@@ -735,7 +735,8 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
     api = {};
     api.cachedPolicies = {
       "new": {},
-      existing: {}
+      existing: {},
+      types: {}
     };
     api.operations = {
       "new": ['pick', 'store', 'storeUrl'],
@@ -744,8 +745,15 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
     api.hasCachedPolicy = function(opt) {
       var cachedPolicy, isCached, operations, rightNowEpoch;
       opt = opt || {};
-      cachedPolicy = opt["new"] ? api.cachedPolicies["new"] : api.cachedPolicies.existing;
-      if (cachedPolicy.policy) {
+      if (_.isUndefined(opt.signType)) {
+        cachedPolicy = api.cachedPolicies[opt["new"] ? 'new' : 'existing'];
+      } else {
+        cachedPolicy = api.cachedPolicies.types[opt.signType];
+        if (cachedPolicy) {
+          cachedPolicy = api.cachedPolicies.types[opt.signType][opt["new"] ? 'new' : 'existing'];
+        }
+      }
+      if (cachedPolicy && cachedPolicy.policy) {
         operations = getOperations(opt["new"]);
         isCached = _.find(cachedPolicy.policy.call, function(operation) {
           return _.contains(operations, operation);
@@ -781,19 +789,40 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
           file_size: opt.size
         });
       }
-      opt.wrapId = opt.wrapId || $rootScope.activeWrap.id;
+      if (_.isUndefined(opt.signType)) {
+        opt.resourceId = opt.wrapId || $rootScope.activeWrap.id;
+      } else if (opt.signType === 'account') {
+        opt.resourceId = opt.signTypeResourceId || $rootScope.currentUser.id;
+      }
       if (!signingInProcess) {
         signingInProcess = true;
-        $http.post(config.signApiUrl(opt.wrapId), signage).success(function(result) {
+        $http.post(config.signApiUrl(opt.resourceId, opt.signType), signage).success(function(result) {
+          var updateSignTypePolicy;
           signingInProcess = false;
           if (config.debugLogging) {
             $log.log("--- filepicker security sign ---");
             $log.log(signage.options.call);
           }
+          updateSignTypePolicy = function() {
+            var cachedType;
+            cachedType = api.cachedPolicies.types[opt.signType];
+            if (_.isUndefined(cachedType)) {
+              api.cachedPolicies.types[opt.signType] = {};
+            }
+            return api.cachedPolicies.types[opt.signType][opt["new"] ? 'new' : 'existing'] = result;
+          };
           if (opt["new"]) {
-            api.cachedPolicies["new"] = result;
+            if (_.isUndefined(opt.signType)) {
+              api.cachedPolicies["new"] = result;
+            } else {
+              updateSignTypePolicy();
+            }
           } else {
-            api.cachedPolicies.existing = result;
+            if (_.isUndefined(opt.signType)) {
+              api.cachedPolicies.existing = result;
+            } else {
+              updateSignTypePolicy();
+            }
           }
           return defer.resolve();
         }).error(function(result) {
@@ -822,9 +851,19 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
         } else {
           signOptions.handle = _.isObject(file.url) ? file.url.url : file.url;
         }
+        if (options.signType) {
+          signOptions.signType = options.signType;
+        }
+        if (options.signTypeResourceId) {
+          signOptions.signTypeResourceId = options.signTypeResourceId;
+        }
         return api.sign(signOptions).then(function() {
           var appendedSecurity, existingPolicy;
-          existingPolicy = api.cachedPolicies.existing;
+          if (_.isUndefined(signOptions.signType)) {
+            existingPolicy = api.cachedPolicies.existing;
+          } else {
+            existingPolicy = api.cachedPolicies.types[signOptions.signType].existing;
+          }
           appendedSecurity = "?signature=" + existingPolicy.signature + "&policy=" + existingPolicy.encoded_policy;
           if (_.isObject(file.url)) {
             file.url.url += appendedSecurity;
@@ -898,7 +937,7 @@ infowrapFilepicker.directive("filepickerBtn", [
     link = function(scope, element, attrs) {
       var processFiles;
       processFiles = function(fpfiles) {
-        var $previewTarget, dispatchPickedFiles, targ;
+        var $previewTarget, dispatchPickedFiles, signOptions, targ;
         if (!_.isArray(fpfiles)) {
           fpfiles = [fpfiles];
         }
@@ -919,7 +958,12 @@ infowrapFilepicker.directive("filepickerBtn", [
               return $rootScope.$broadcast(fp.events.pickedFiles, files, scope.targetType);
             };
             if (config.useSecurity) {
-              fps.secureForReading(fpfiles).then(dispatchPickedFiles);
+              signOptions = {
+                wrapId: scope.targetParentId,
+                signType: scope.signType,
+                signTypeResourceId: scope.signTypeResourceId
+              };
+              fps.secureForReading(fpfiles, signOptions).then(dispatchPickedFiles);
             } else {
               dispatchPickedFiles(fpfiles);
             }
@@ -935,7 +979,7 @@ infowrapFilepicker.directive("filepickerBtn", [
         return $rootScope.safeApply();
       };
       return scope.pick = function(e) {
-        var showPickDialog, signOptions;
+        var hasCachedPolicyOptions, showPickDialog, signOptions;
         showPickDialog = function() {
           var newPolicy, options, pickedFiles;
           if (config.useSecurity) {
@@ -979,14 +1023,18 @@ infowrapFilepicker.directive("filepickerBtn", [
           }
         };
         if (config.useSecurity) {
-          if (fps.hasCachedPolicy({
-            "new": true
-          })) {
+          hasCachedPolicyOptions = {
+            "new": true,
+            signType: scope.signType
+          };
+          if (fps.hasCachedPolicy(hasCachedPolicyOptions)) {
             return showPickDialog();
           } else {
             signOptions = {
               "new": true,
-              wrapId: scope.targetParentId
+              wrapId: scope.targetParentId,
+              signType: scope.signType,
+              signTypeResourceId: scope.signTypeResourceId
             };
             return fps.sign(signOptions).then(function() {
               return showPickDialog();
@@ -1012,6 +1060,8 @@ infowrapFilepicker.directive("filepickerBtn", [
         previewOnUpload: "@",
         previewTarget: "@",
         services: "@",
+        signType: "@",
+        signTypeResourceId: "@",
         storeLocation: "@",
         targetId: "=?",
         targetParentId: "=?",

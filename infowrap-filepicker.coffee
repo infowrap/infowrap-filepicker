@@ -677,6 +677,8 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
   api.cachedPolicies =
     new:{}
     existing:{}
+    # types: this is for specific types of signing which may use a special sign api call than the default
+    types:{}
 
   # due to their nature, best to have filepicker's api split out into 2 different sets of operations
   # this makes signing simpler for various purposes
@@ -691,8 +693,15 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
     #     new(bool) - flag to check the appropriate cached policy for the particular set of operations
     #
     # ...more options may be required in the future
-    cachedPolicy = if opt.new then api.cachedPolicies.new else api.cachedPolicies.existing
-    if cachedPolicy.policy
+    if _.isUndefined(opt.signType)
+      cachedPolicy = api.cachedPolicies[if opt.new then 'new' else 'existing']
+    else
+      cachedPolicy = api.cachedPolicies.types[opt.signType]
+      if cachedPolicy
+        cachedPolicy = api.cachedPolicies.types[opt.signType][if opt.new then 'new' else 'existing']
+
+
+    if cachedPolicy and cachedPolicy.policy
       operations = getOperations(opt.new)
       # check if operation requested already has a valid policy cached
       isCached = _.find cachedPolicy.policy.call, (operation) ->
@@ -717,22 +726,43 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
     # must strip the filepicker id off the end of the handle
     _.extend(signage.options, {handle:opt.handle.substr(opt.handle.lastIndexOf('/') + 1)}) if opt.handle
     _.extend(signage.options, {file_size:opt.size}) if opt.size
-    opt.wrapId = opt.wrapId or $rootScope.activeWrap.id # default to activeWrap
+
+    # Infowrap specific
+    if _.isUndefined(opt.signType)
+      # default to wrap
+      opt.resourceId = opt.wrapId or $rootScope.activeWrap.id
+    else if opt.signType is 'account'
+      # account specific sign
+      opt.resourceId = opt.signTypeResourceId or $rootScope.currentUser.id
 
     unless signingInProcess
       # prevent multiple simultaneous signing calls (can happen on page load)
       signingInProcess = true
-      $http.post(config.signApiUrl(opt.wrapId), signage).success((result) ->
+      $http.post(config.signApiUrl(opt.resourceId, opt.signType), signage).success((result) ->
         signingInProcess = false
         # cache the policy for the appropriate operation sets
         if config.debugLogging
           $log.log("--- filepicker security sign ---")
           $log.log(signage.options.call)
 
+        updateSignTypePolicy = () ->
+          cachedType = api.cachedPolicies.types[opt.signType]
+          if _.isUndefined(cachedType)
+            api.cachedPolicies.types[opt.signType] = {}
+
+          api.cachedPolicies.types[opt.signType][if opt.new then 'new' else 'existing'] = result
+
         if opt.new
-          api.cachedPolicies.new = result
+          if _.isUndefined(opt.signType)
+            api.cachedPolicies.new = result
+          else
+            updateSignTypePolicy()
         else
-          api.cachedPolicies.existing = result
+          if _.isUndefined(opt.signType)
+            api.cachedPolicies.existing = result
+          else
+            updateSignTypePolicy()
+
         defer.resolve()
         ).error (result) ->
           signingInProcess = false
@@ -763,8 +793,14 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
         # defaults to using url as handle
         signOptions.handle = if _.isObject(file.url) then file.url.url else file.url
 
+      signOptions.signType = options.signType if options.signType
+      signOptions.signTypeResourceId = options.signTypeResourceId if options.signTypeResourceId
+
       api.sign(signOptions).then ->
-        existingPolicy = api.cachedPolicies.existing
+        if _.isUndefined(signOptions.signType)
+          existingPolicy = api.cachedPolicies.existing
+        else
+          existingPolicy = api.cachedPolicies.types[signOptions.signType].existing
         # update url to have a secure policy
         appendedSecurity = "?signature=#{existingPolicy.signature}&policy=#{existingPolicy.encoded_policy}"
         if _.isObject(file.url)
@@ -859,7 +895,11 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
           if config.useSecurity
             # security is enabled by default
             # must handle security for these picked files (because we cannot read a file that is not secured)
-            fps.secureForReading(fpfiles).then(dispatchPickedFiles)
+            signOptions =
+              wrapId:scope.targetParentId
+              signType:scope.signType
+              signTypeResourceId:scope.signTypeResourceId
+            fps.secureForReading(fpfiles, signOptions).then(dispatchPickedFiles)
           else
             dispatchPickedFiles(fpfiles)
 
@@ -906,13 +946,18 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
 
       if config.useSecurity
         # check if a cached policy already exist for this
-        if fps.hasCachedPolicy({new:true})
+        hasCachedPolicyOptions =
+          new:true
+          signType:scope.signType
+        if fps.hasCachedPolicy(hasCachedPolicyOptions)
           showPickDialog()
         else
           # no cached policy, sign to get one
           signOptions =
             new:true
             wrapId:scope.targetParentId
+            signType:scope.signType
+            signTypeResourceId:scope.signTypeResourceId
           fps.sign(signOptions).then ->
             showPickDialog()
       else
@@ -932,6 +977,8 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
     previewOnUpload: "@"
     previewTarget:"@"
     services: "@"
+    signType: "@"
+    signTypeResourceId: "@"
     storeLocation: "@"
     targetId: "=?"
     targetParentId:"=?"
