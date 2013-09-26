@@ -335,15 +335,14 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
   api.store = (input, opt) ->
     defer = $q.defer()
 
-    storeFile = () ->
+    storeFile = (signedPolicy) ->
       result = input: input
 
       # assign signed policy first
-      newPolicy = fps.cachedPolicies.new
       options =
-        policy: newPolicy.encoded_policy
-        signature: newPolicy.signature
-        path: newPolicy.policy.path
+        policy: signedPolicy.encoded_policy
+        signature: signedPolicy.signature
+        path: signedPolicy.policy.path
         location:'S3'
 
       filepicker.store input, options, (data) ->
@@ -363,15 +362,16 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
           $rootScope.$broadcast(api.events.storeProgress, result)
 
     # check if a cached policy already exist for this
-    if fps.hasCachedPolicy({new:true})
-      storeFile()
+    cachedPolicy = fps.getCachedPolicy({new:true})
+    if cachedPolicy
+      storeFile(cachedPolicy)
     else
       # no cached policy, sign to get one
       signOptions =
         new:true
         wrapId:opt.wrapId
-      fps.sign(signOptions).then ->
-        storeFile()
+      fps.sign(signOptions).then (signedPolicy) ->
+        storeFile(signedPolicy)
 
     defer.promise
 
@@ -687,7 +687,7 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
     existing: ['read', 'stat', 'convert', 'write', 'writeUrl'] # for working with 'existing' filepicker files
 
   # use this to check if a valid cached policy exists for the set of operations needed
-  api.hasCachedPolicy = (opt) ->
+  api.getCachedPolicy = (opt) ->
     opt = opt or {}
     # opt:
     #     new(bool) - flag to check the appropriate cached policy for the particular set of operations
@@ -709,7 +709,8 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
       if isCached and cachedPolicy.policy.expiry
         # check the expiration
         rightNowEpoch = Math.floor(new Date().getTime() / 1000)
-        return rightNowEpoch <= Number(cachedPolicy.policy.expiry)
+        if rightNowEpoch <= Number(cachedPolicy.policy.expiry)
+          return cachedPolicy
 
     return false
 
@@ -752,18 +753,19 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
 
           api.cachedPolicies.types[opt.signType][if opt.new then 'new' else 'existing'] = result
 
-        if opt.new
-          if _.isUndefined(opt.signType)
-            api.cachedPolicies.new = result
+        getSignedPolicy = () ->
+          if opt.new
+            if _.isUndefined(opt.signType)
+              api.cachedPolicies.new = result
+            else
+              updateSignTypePolicy()
           else
-            updateSignTypePolicy()
-        else
-          if _.isUndefined(opt.signType)
-            api.cachedPolicies.existing = result
-          else
-            updateSignTypePolicy()
+            if _.isUndefined(opt.signType)
+              api.cachedPolicies.existing = result
+            else
+              updateSignTypePolicy()
 
-        defer.resolve()
+        defer.resolve(getSignedPolicy())
         ).error (result) ->
           signingInProcess = false
           # TODO: should probably handle these errors in a standard way
@@ -914,15 +916,14 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
 
     scope.pick = (e) ->
 
-      showPickDialog = () ->
+      showPickDialog = (signedPolicy) ->
 
         if config.useSecurity
           # assign signed policy first
-          newPolicy = fps.cachedPolicies.new
           options =
-            policy: newPolicy.encoded_policy
-            signature: newPolicy.signature
-            path:newPolicy.policy.path
+            policy: signedPolicy.encoded_policy
+            signature: signedPolicy.signature
+            path:signedPolicy.policy.path
         else
           options = {}
 
@@ -946,11 +947,12 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
 
       if config.useSecurity
         # check if a cached policy already exist for this
-        hasCachedPolicyOptions =
+        cachedPolicyOptions =
           new:true
           signType:scope.signType
-        if fps.hasCachedPolicy(hasCachedPolicyOptions)
-          showPickDialog()
+        cachedPolicy = fps.getCachedPolicy(cachedPolicyOptions)
+        if cachedPolicy
+          showPickDialog(cachedPolicy)
         else
           # no cached policy, sign to get one
           signOptions =
@@ -958,8 +960,8 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
             wrapId:scope.targetParentId
             signType:scope.signType
             signTypeResourceId:scope.signTypeResourceId
-          fps.sign(signOptions).then ->
-            showPickDialog()
+          fps.sign(signOptions).then (signedPolicy) ->
+            showPickDialog(signedPolicy)
       else
         showPickDialog()
 
