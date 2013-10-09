@@ -729,11 +729,11 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
     _.extend(signage.options, {file_size:opt.size}) if opt.size
 
     # Infowrap specific
-    if _.isUndefined(opt.signType)
-      # default to wrap
-      opt.resourceId = opt.wrapId or $rootScope.activeWrap.id
-    else if opt.signType is 'account'
-      # account specific sign
+    # default to wrap
+    activeWrapId = if $rootScope.activeWrap then $rootScope.activeWrap.id else undefined
+    opt.resourceId = opt.wrapId or activeWrapId
+    if opt.signType is 'account'
+      # override resourceId for specific types
       opt.resourceId = opt.signTypeResourceId or $rootScope.currentUser.id
 
     unless signingInProcess
