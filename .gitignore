@@ -1,3 +1,5 @@
 .DS_Store
 node_modules
-*.js
+Gruntfile.js
+infowrap-filepicker.js
+infowrap-filepicker.min.js

@@ -768,7 +768,7 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
       return false;
     };
     api.sign = function(opt) {
-      var defer, signage;
+      var activeWrapId, defer, signage;
       opt = opt || {};
       defer = $q.defer();
       signage = {
@@ -791,9 +791,9 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
           file_size: opt.size
         });
       }
-      if (_.isUndefined(opt.signType)) {
-        opt.resourceId = opt.wrapId || $rootScope.activeWrap.id;
-      } else if (opt.signType === 'account') {
+      activeWrapId = $rootScope.activeWrap ? $rootScope.activeWrap.id : void 0;
+      opt.resourceId = opt.wrapId || activeWrapId;
+      if (opt.signType === 'account') {
         opt.resourceId = opt.signTypeResourceId || $rootScope.currentUser.id;
       }
       if (!signingInProcess) {
