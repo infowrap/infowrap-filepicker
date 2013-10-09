@@ -1,6 +1,6 @@
 {
   "name": "infowrap-filepicker",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "main": "infowrap-filepicker.js",
   "ignore": [
     "**/.*",
