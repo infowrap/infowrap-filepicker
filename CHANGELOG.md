@@ -1,3 +1,13 @@
+# 0.2.0 (2013-10-09)
+
+
+## Bug Fixes
+
+- **app-server:** 
+  - missing app-server.js on github ([4f3d335f](https://github.com/infowrap/infowrap-filepicker/commit/4f3d335f))  
+- **infowrap:** 
+  - fixed issue around signing within Infowraps specific implementation details for signing. ([a336ee1f](https://github.com/infowrap/infowrap-filepicker/commit/a336ee1f))   
+
 # 0.1.9 (2013-09-26)
 
 ## Features
