@@ -362,13 +362,6 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
           return $rootScope.safeApply(function() {
             return defer.reject(result);
           });
-        }, function(percent) {
-          _.extend(result, {
-            progress: percent
-          });
-          return $rootScope.safeApply(function() {
-            return $rootScope.$broadcast(api.events.storeProgress, result);
-          });
         });
       };
       cachedPolicy = fps.getCachedPolicy({
@@ -478,13 +471,6 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
           });
           return $rootScope.safeApply(function() {
             return defer.reject(result);
-          });
-        }, function(percent) {
-          _.extend(result, {
-            progress: percent
-          });
-          return $rootScope.safeApply(function() {
-            return $rootScope.$broadcast(api.events.readProgress, result);
           });
         });
       };
