@@ -356,10 +356,11 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
         $rootScope.safeApply ->
           defer.reject(result)
 
-      , (percent) ->
-        _.extend(result, progress: percent)
-        $rootScope.safeApply ->
-          $rootScope.$broadcast(api.events.storeProgress, result)
+      # commenting out progress events due to filepicker bug
+      # , (percent) ->
+      #   _.extend(result, progress: percent)
+      #   $rootScope.safeApply ->
+      #     $rootScope.$broadcast(api.events.storeProgress, result)
 
     # check if a cached policy already exist for this
     cachedPolicy = fps.getCachedPolicy({new:true})
@@ -447,10 +448,11 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
         _.extend(result, error: fperror)
         $rootScope.safeApply ->
           defer.reject(result)
-      , (percent) ->
-        _.extend(result, progress: percent)
-        $rootScope.safeApply ->
-          $rootScope.$broadcast(api.events.readProgress, result)
+      # commenting out progress events due to filepicker bug
+      # , (percent) ->
+      #   _.extend(result, progress: percent)
+      #   $rootScope.safeApply ->
+      #     $rootScope.$broadcast(api.events.readProgress, result)
 
     getUrlToReadFrom = (input, options) ->
       url = input
