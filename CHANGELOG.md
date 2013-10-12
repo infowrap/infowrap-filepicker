@@ -1,10 +1,17 @@
+# 0.2.2 (2013-10-12)
+
+## Features
+
+- **update:**
+  - updated to latest angular 1.2.0-rc2 ([e80481914e](https://github.com/infowrap/infowrap-filepicker/commit/e80481914e))
+
 # 0.2.1 (2013-10-11)
 
 
 ## Bug Fixes
 
-- **progress:** 
-  - providing workaround for filepicker's progress event bug ([b9a71b06](https://github.com/infowrap/infowrap-filepicker/commit/b9a71b06))   
+- **progress:**
+  - providing workaround for filepicker's progress event bug ([b9a71b06](https://github.com/infowrap/infowrap-filepicker/commit/b9a71b06))
 
 # 0.2.0 (2013-10-09)
 
