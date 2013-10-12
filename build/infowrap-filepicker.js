@@ -926,6 +926,10 @@ infowrapFilepicker.directive("filepickerBtn", [
     var link;
     link = function(scope, element, attrs) {
       var processFiles;
+      if (!_.isUndefined(scope.processWhen) && !scope.processWhen) {
+        element.remove();
+        return;
+      }
       processFiles = function(fpfiles) {
         var $previewTarget, dispatchPickedFiles, signOptions, targ;
         if (!_.isArray(fpfiles)) {
@@ -1049,6 +1053,7 @@ infowrapFilepicker.directive("filepickerBtn", [
         preventDefault: "@",
         previewOnUpload: "@",
         previewTarget: "@",
+        processWhen: "=?",
         services: "@",
         signType: "@",
         signTypeResourceId: "@",

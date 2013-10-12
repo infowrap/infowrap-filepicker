@@ -874,6 +874,10 @@ infowrapFilepicker.run(["infowrapFilepicker.config", 'infowrapFilepickerService'
 infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "infowrapFilepickerService", "infowrapFilepickerSecurity", "$timeout", "$rootScope", (config, fp, fps, $timeout, $rootScope) ->
   link = (scope, element, attrs) ->
 
+    if !_.isUndefined(scope.processWhen) and !scope.processWhen
+      element.remove()
+      return
+
     processFiles = (fpfiles) ->
       unless _.isArray(fpfiles)
         # because pick is sometimes used (for single file select) over pickMultiple
@@ -980,6 +984,7 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
     preventDefault:"@"
     previewOnUpload: "@"
     previewTarget:"@"
+    processWhen: "=?"
     services: "@"
     signType: "@"
     signTypeResourceId: "@"
