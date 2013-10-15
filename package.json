@@ -1,6 +1,6 @@
 {
   "name": "infowrap-filepicker",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "An Angular module that provides services and directives to work with Ink File Picker (https://www.inkfilepicker.com/)",
   "homepage": "http://dev.infowrap.com/code/angular/angular-filepicker",
   "repository": "",
