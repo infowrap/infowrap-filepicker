@@ -1,3 +1,11 @@
+# 0.2.3 (2013-10-15)
+
+## Features
+
+- **store:** 
+  - allowing store calls to be made for an account instead of only a wrap ([e907a1fa](https://github.com/infowrap/infowrap-filepicker/commit/e907a1fa))   
+
+
 # 0.2.2 (2013-10-12)
 
 ## Features
