@@ -371,9 +371,13 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
         storeFile(cachedPolicy);
       } else {
         signOptions = {
-          "new": true,
-          wrapId: opt.wrapId
+          "new": true
         };
+        if (opt.wrapId) {
+          signOptions.wrapId = opt.wrapId;
+        } else if (opt.signType) {
+          signOptions.signType = opt.signType;
+        }
         fps.sign(signOptions).then(function(signedPolicy) {
           return storeFile(signedPolicy);
         });

@@ -370,7 +370,12 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
       # no cached policy, sign to get one
       signOptions =
         new:true
-        wrapId:opt.wrapId
+
+      if opt.wrapId
+        signOptions.wrapId = opt.wrapId
+      else if opt.signType
+        signOptions.signType = opt.signType
+
       fps.sign(signOptions).then (signedPolicy) ->
         storeFile(signedPolicy)
 
