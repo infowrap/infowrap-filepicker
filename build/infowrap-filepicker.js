@@ -53,9 +53,10 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
     */
 
     api.loadFilepicker = function() {
-      var checkIfLoaded, defer;
+      var checkIfLoaded, configuredProtocol, defer;
       defer = $q.defer();
-      $('body').append('<script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>');
+      configuredProtocol = config.loadProtocol || "";
+      $('body').append("<script type=\"text/javascript\" src=\"" + configuredProtocol + "//api.filepicker.io/v1/filepicker.js\"></script>");
       checkIfLoaded = function() {
         if (_.isUndefined($window.filepicker)) {
           return $timeout(function() {
