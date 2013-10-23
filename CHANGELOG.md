@@ -1,3 +1,11 @@
+# 0.2.6 (2013-10-23)
+
+## Features
+
+- **load:** 
+  - allow filepicker library to be loaded from a specific protocol if desired via a configuration parameter. ([e0ad620b](https://github.com/infowrap/infowrap-filepicker/commit/e0ad620b))   
+
+
 # 0.2.3 (2013-10-15)
 
 ## Features
