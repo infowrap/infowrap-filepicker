@@ -49,7 +49,9 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
   ###
   api.loadFilepicker = ->
     defer = $q.defer()
-    $('body').append('<script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>')
+    # Configure a specific protocol to use or fallback to using whatever protocol this is being hosted from
+    configuredProtocol = config.loadProtocol or ""
+    $('body').append("<script type=\"text/javascript\" src=\"#{configuredProtocol}//api.filepicker.io/v1/filepicker.js\"></script>")
     checkIfLoaded = ->
       if _.isUndefined($window.filepicker)
         $timeout ->

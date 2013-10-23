@@ -4,6 +4,7 @@ ExampleApp.value("infowrapFilepicker.config", {
     apiKey: "AQixW1s8yRrqymYokyC3Oz",
     iframeContainer:'filepicker-modal-container',
     isMobile:false,
+    loadProtocol:'https:',
     debugLogging:true,
     useSecurity:false,
     signApiUrl:function(resourceId) {
