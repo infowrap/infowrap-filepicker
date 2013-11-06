@@ -9,6 +9,11 @@
 <% _(changelog.fix).keys().sort().forEach(function(scope) { %>
 - **<%= scope%>:** <% changelog.fix[scope].forEach(function(change) { %>
   - <%= change.msg%> (<%= helpers.commitLink(change.sha1) %>)  <% }); %><% }); %> <% } %>
+<% if (_(changelog.refactor).size() > 0) { %>
+## Refactor
+<% _(changelog.refactor).keys().sort().forEach(function(scope) { %>
+- **<%= scope%>:** <% changelog.refactor[scope].forEach(function(change) { %>
+  - <%= change.msg%> (<%= helpers.commitLink(change.sha1) %>)  <% }); %><% }); %> <% } %>
 <% if (_(changelog.breaking).size() > 0) { %>
 ## Breaking Changes
 <% _(changelog.breaking).keys().sort().forEach(function(scope) { %>

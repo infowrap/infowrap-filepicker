@@ -1,17 +1,24 @@
+# 0.2.8 (2013-11-06)
+
+## Refactor
+
+- **safeApply:**
+  - Using a decorator to better handle adding safeApply to $rootScope ([7c401dda](https://github.com/infowrap/infowrap-filepicker/commit/7c401dda))
+
 # 0.2.6 (2013-10-23)
 
 ## Features
 
-- **load:** 
-  - allow filepicker library to be loaded from a specific protocol if desired via a configuration parameter. ([e0ad620b](https://github.com/infowrap/infowrap-filepicker/commit/e0ad620b))   
+- **load:**
+  - allow filepicker library to be loaded from a specific protocol if desired via a configuration parameter. ([e0ad620b](https://github.com/infowrap/infowrap-filepicker/commit/e0ad620b))
 
 
 # 0.2.3 (2013-10-15)
 
 ## Features
 
-- **store:** 
-  - allowing store calls to be made for an account instead of only a wrap ([e907a1fa](https://github.com/infowrap/infowrap-filepicker/commit/e907a1fa))   
+- **store:**
+  - allowing store calls to be made for an account instead of only a wrap ([e907a1fa](https://github.com/infowrap/infowrap-filepicker/commit/e907a1fa))
 
 
 # 0.2.2 (2013-10-12)
