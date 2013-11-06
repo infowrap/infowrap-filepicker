@@ -15,6 +15,23 @@ angular.module("infowrapFilepicker.config", []).value("infowrapFilepicker.config
 
 infowrapFilepicker = angular.module("infowrapFilepicker", ["infowrapFilepicker.config"]);
 
+infowrapFilepicker.config([
+  '$provide', function($provide) {
+    return $provide.decorator('$rootScope', [
+      '$delegate', function($delegate) {
+        $delegate.safeApply = function(fn) {
+          var phase;
+          phase = $delegate.$$phase;
+          if (phase !== "$apply" && phase !== "$digest") {
+            return $delegate.$apply(fn);
+          }
+        };
+        return $delegate;
+      }
+    ]);
+  }
+]);
+
 /**
 * @ngdoc object
 * @name infowrapFilepicker.service:infowrapFilepickerService
@@ -882,19 +899,6 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
 
 infowrapFilepicker.run([
   "infowrapFilepicker.config", 'infowrapFilepickerService', '$rootScope', '$window', function(config, fp, $rootScope, $window) {
-    $rootScope.safeApply = function(fn) {
-      var phase;
-      phase = this.$root.$$phase;
-      if (phase === "$apply" || phase === "$digest") {
-        if (fn) {
-          return $rootScope.$eval(fn);
-        }
-      } else if (fn) {
-        return $rootScope.$apply(fn);
-      } else {
-        return $rootScope.$apply();
-      }
-    };
     if (config.apiKey) {
       fp.loadFilepicker().then(function() {
         return $window.filepicker.setKey(config.apiKey);

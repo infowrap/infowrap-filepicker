@@ -12,6 +12,17 @@ angular.module("infowrapFilepicker.config", []).value("infowrapFilepicker.config
 
 infowrapFilepicker = angular.module("infowrapFilepicker", ["infowrapFilepicker.config"])
 
+infowrapFilepicker
+  .config ['$provide', ($provide) ->
+    $provide.decorator '$rootScope', ['$delegate', ($delegate) ->
+      # everybody needs a safeApply :)
+      $delegate.safeApply = (fn) ->
+        phase = $delegate.$$phase
+        $delegate.$apply(fn)  if phase isnt "$apply" and phase isnt "$digest"
+      return $delegate
+    ]
+  ]
+
 ###*
 * @ngdoc object
 * @name infowrapFilepicker.service:infowrapFilepickerService
@@ -835,18 +846,6 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
 ])
 
 infowrapFilepicker.run(["infowrapFilepicker.config", 'infowrapFilepickerService', '$rootScope', '$window', (config, fp, $rootScope, $window) ->
-
-  # Your code may already implement this
-  $rootScope.safeApply = (fn) ->
-    # ensure angular knows about filepickers callbacks
-    phase = this.$root.$$phase
-    if phase is "$apply" or phase is "$digest"
-      if fn
-        $rootScope.$eval(fn)
-    else if fn
-      $rootScope.$apply(fn)
-    else
-      $rootScope.$apply()
 
   if config.apiKey
     fp.loadFilepicker().then ->
