@@ -1,3 +1,12 @@
+# 0.2.9 (2013-11-06)
+
+
+## Bug Fixes
+
+- **safeApply:** 
+  - fixed issue with safeApply setup ([1eeb2b9b](https://github.com/infowrap/infowrap-filepicker/commit/1eeb2b9b))   
+
+
 # 0.2.8 (2013-11-06)
 
 ## Refactor
