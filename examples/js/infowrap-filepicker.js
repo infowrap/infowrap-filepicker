@@ -22,7 +22,11 @@ infowrapFilepicker.config([
         $delegate.safeApply = function(fn) {
           var phase;
           phase = $delegate.$$phase;
-          if (phase !== "$apply" && phase !== "$digest") {
+          if (phase === "$apply" || phase === "$digest") {
+            if (fn && typeof fn === 'function') {
+              return fn();
+            }
+          } else {
             return $delegate.$apply(fn);
           }
         };

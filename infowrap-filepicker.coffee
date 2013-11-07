@@ -18,7 +18,12 @@ infowrapFilepicker
       # everybody needs a safeApply :)
       $delegate.safeApply = (fn) ->
         phase = $delegate.$$phase
-        $delegate.$apply(fn)  if phase isnt "$apply" and phase isnt "$digest"
+        if phase is "$apply" or phase is "$digest"
+          if fn and typeof fn is 'function'
+            # in middle of digest, just execute function normally
+            fn()
+        else
+          $delegate.$apply(fn)
       return $delegate
     ]
   ]
