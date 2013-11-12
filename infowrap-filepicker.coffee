@@ -931,8 +931,7 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
           targetType: scope.targetType
       $rootScope.safeApply()
 
-    scope.pick = (e) ->
-
+    pick = (e) ->
       showPickDialog = (signedPolicy) ->
 
         if config.useSecurity
@@ -955,12 +954,12 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
           fp.log(fpfiles)
           processFiles(if _.isArray(fpfiles) then fpfiles else [fpfiles])
 
-
-        if scope.storeLocation
-          # go ahead and store immediately after the pick
-          fp.pickAndStore(options).then(pickedFiles)
-        else
-          fp.pick(options).then(pickedFiles)
+        $rootScope.safeApply ->
+          if scope.storeLocation
+            # go ahead and store immediately after the pick
+            fp.pickAndStore(options).then(pickedFiles)
+          else
+            fp.pick(options).then(pickedFiles)
 
       if config.useSecurity
         # check if a cached policy already exist for this
@@ -977,10 +976,13 @@ infowrapFilepicker.directive("filepickerBtn", ["infowrapFilepicker.config", "inf
             wrapId:scope.targetParentId
             signType:scope.signType
             signTypeResourceId:scope.signTypeResourceId
-          fps.sign(signOptions).then (signedPolicy) ->
-            showPickDialog(signedPolicy)
+          $rootScope.safeApply ->
+            fps.sign(signOptions).then (signedPolicy) ->
+              showPickDialog(signedPolicy)
       else
         showPickDialog()
+
+    element.bind('click', pick)
 
   restrict: "A"
   scope:

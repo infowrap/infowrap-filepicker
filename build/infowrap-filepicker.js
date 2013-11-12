@@ -938,7 +938,7 @@ infowrapFilepicker.directive("filepickerBtn", [
   "infowrapFilepicker.config", "infowrapFilepickerService", "infowrapFilepickerSecurity", "$timeout", "$rootScope", function(config, fp, fps, $timeout, $rootScope) {
     var link;
     link = function(scope, element, attrs) {
-      var processFiles;
+      var pick, processFiles;
       if (!_.isUndefined(scope.processWhen) && !scope.processWhen) {
         element.remove();
         return;
@@ -985,7 +985,7 @@ infowrapFilepicker.directive("filepickerBtn", [
         }
         return $rootScope.safeApply();
       };
-      return scope.pick = function(e) {
+      pick = function(e) {
         var cachedPolicy, cachedPolicyOptions, showPickDialog, signOptions;
         showPickDialog = function(signedPolicy) {
           var options, pickedFiles;
@@ -1022,11 +1022,13 @@ infowrapFilepicker.directive("filepickerBtn", [
             fp.log(fpfiles);
             return processFiles(_.isArray(fpfiles) ? fpfiles : [fpfiles]);
           };
-          if (scope.storeLocation) {
-            return fp.pickAndStore(options).then(pickedFiles);
-          } else {
-            return fp.pick(options).then(pickedFiles);
-          }
+          return $rootScope.safeApply(function() {
+            if (scope.storeLocation) {
+              return fp.pickAndStore(options).then(pickedFiles);
+            } else {
+              return fp.pick(options).then(pickedFiles);
+            }
+          });
         };
         if (config.useSecurity) {
           cachedPolicyOptions = {
@@ -1043,14 +1045,17 @@ infowrapFilepicker.directive("filepickerBtn", [
               signType: scope.signType,
               signTypeResourceId: scope.signTypeResourceId
             };
-            return fps.sign(signOptions).then(function(signedPolicy) {
-              return showPickDialog(signedPolicy);
+            return $rootScope.safeApply(function() {
+              return fps.sign(signOptions).then(function(signedPolicy) {
+                return showPickDialog(signedPolicy);
+              });
             });
           }
         } else {
           return showPickDialog();
         }
       };
+      return element.bind('click', pick);
     };
     return {
       restrict: "A",
