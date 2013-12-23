@@ -798,6 +798,14 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
             if config.debugLogging
               $log.log(result.error)
 
+          if config.errorHandling
+            # check all errors that need to be handled
+            for errorHandler in config.errorHandling
+              if _.contains errorHandler.msgs, result.error
+                $rootScope.$emit errorHandler.eventName,
+                  data:
+                    error: result.error
+
           defer.reject(result.error)
 
     # safe apply is critical here - sometimes a sign() call will be made outside of angular's digest

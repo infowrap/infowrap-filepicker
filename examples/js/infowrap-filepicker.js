@@ -842,10 +842,24 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
           };
           return defer.resolve(getSignedPolicy());
         }).error(function(result) {
+          var errorHandler, _i, _len, _ref;
           signingInProcess = false;
           if (result.error === 'filenotfound') {
             if (config.debugLogging) {
               $log.log(result.error);
+            }
+          }
+          if (config.errorHandling) {
+            _ref = config.errorHandling;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              errorHandler = _ref[_i];
+              if (_.contains(errorHandler.msgs, result.error)) {
+                $rootScope.$emit(errorHandler.eventName, {
+                  data: {
+                    error: result.error
+                  }
+                });
+              }
             }
           }
           return defer.reject(result.error);
