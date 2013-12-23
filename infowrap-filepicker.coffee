@@ -764,49 +764,59 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", ["infowrapFilepicker.co
     unless signingInProcess
       # prevent multiple simultaneous signing calls (can happen on page load)
       signingInProcess = true
+
+      handleError = (error) ->
+        $log.log("--- filepicker security sign ERROR ---")
+        if error is 'filenotfound'
+          if config.debugLogging
+            $log.log(error)
+
+        if config.errorHandling
+          # check all errors that need to be handled
+          for errorHandler in config.errorHandling
+            if _.contains errorHandler.msgs, error
+              $rootScope.$emit errorHandler.eventName,
+                data:
+                  error: error
+
       $http.post(config.signApiUrl(opt.resourceId, opt.signType), signage).success((result) ->
         signingInProcess = false
         # cache the policy for the appropriate operation sets
-        if config.debugLogging
-          $log.log("--- filepicker security sign ---")
-          $log.log(signage.options.call)
-
-        updateSignTypePolicy = () ->
-          cachedType = api.cachedPolicies.types[opt.signType]
-          if _.isUndefined(cachedType)
-            api.cachedPolicies.types[opt.signType] = {}
-
-          api.cachedPolicies.types[opt.signType][if opt.new then 'new' else 'existing'] = result
-
-        getSignedPolicy = () ->
-          if opt.new
-            if _.isUndefined(opt.signType)
-              api.cachedPolicies.new = result
-            else
-              updateSignTypePolicy()
-          else
-            if _.isUndefined(opt.signType)
-              api.cachedPolicies.existing = result
-            else
-              updateSignTypePolicy()
-
-        defer.resolve(getSignedPolicy())
-        ).error (result) ->
-          signingInProcess = false
-          # TODO: should probably handle these errors in a standard way
-          if result.error is 'filenotfound'
-            if config.debugLogging
-              $log.log(result.error)
-
-          if config.errorHandling
-            # check all errors that need to be handled
-            for errorHandler in config.errorHandling
-              if _.contains errorHandler.msgs, result.error
-                $rootScope.$emit errorHandler.eventName,
-                  data:
-                    error: result.error
-
+        if result and result.error
+          handleError(result.error)
           defer.reject(result.error)
+        else
+          if config.debugLogging
+            $log.log("--- filepicker security sign ---")
+            $log.log(signage.options.call)
+
+          updateSignTypePolicy = () ->
+            cachedType = api.cachedPolicies.types[opt.signType]
+            if _.isUndefined(cachedType)
+              api.cachedPolicies.types[opt.signType] = {}
+
+            api.cachedPolicies.types[opt.signType][if opt.new then 'new' else 'existing'] = result
+
+          getSignedPolicy = () ->
+            if opt.new
+              if _.isUndefined(opt.signType)
+                api.cachedPolicies.new = result
+              else
+                updateSignTypePolicy()
+            else
+              if _.isUndefined(opt.signType)
+                api.cachedPolicies.existing = result
+              else
+                updateSignTypePolicy()
+
+          defer.resolve(getSignedPolicy())
+      ).error (result) ->
+        signingInProcess = false
+        # TODO: should probably handle these errors in a standard way
+        if result and result.error
+          handleError(result.error)
+
+        defer.reject(result.error)
 
     # safe apply is critical here - sometimes a sign() call will be made outside of angular's digest
     # without this, the $http call above will sometimes not fire! - do not remove

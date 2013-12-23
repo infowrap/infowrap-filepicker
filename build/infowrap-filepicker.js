@@ -780,7 +780,7 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
       return false;
     };
     api.sign = function(opt) {
-      var activeWrapId, defer, signage;
+      var activeWrapId, defer, handleError, signage;
       opt = opt || {};
       defer = $q.defer();
       signage = {
@@ -810,57 +810,72 @@ infowrapFilepicker.factory("infowrapFilepickerSecurity", [
       }
       if (!signingInProcess) {
         signingInProcess = true;
-        $http.post(config.signApiUrl(opt.resourceId, opt.signType), signage).success(function(result) {
-          var getSignedPolicy, updateSignTypePolicy;
-          signingInProcess = false;
-          if (config.debugLogging) {
-            $log.log("--- filepicker security sign ---");
-            $log.log(signage.options.call);
-          }
-          updateSignTypePolicy = function() {
-            var cachedType;
-            cachedType = api.cachedPolicies.types[opt.signType];
-            if (_.isUndefined(cachedType)) {
-              api.cachedPolicies.types[opt.signType] = {};
-            }
-            return api.cachedPolicies.types[opt.signType][opt["new"] ? 'new' : 'existing'] = result;
-          };
-          getSignedPolicy = function() {
-            if (opt["new"]) {
-              if (_.isUndefined(opt.signType)) {
-                return api.cachedPolicies["new"] = result;
-              } else {
-                return updateSignTypePolicy();
-              }
-            } else {
-              if (_.isUndefined(opt.signType)) {
-                return api.cachedPolicies.existing = result;
-              } else {
-                return updateSignTypePolicy();
-              }
-            }
-          };
-          return defer.resolve(getSignedPolicy());
-        }).error(function(result) {
-          var errorHandler, _i, _len, _ref;
-          signingInProcess = false;
-          if (result.error === 'filenotfound') {
+        handleError = function(error) {
+          var errorHandler, _i, _len, _ref, _results;
+          $log.log("--- filepicker security sign ERROR ---");
+          if (error === 'filenotfound') {
             if (config.debugLogging) {
-              $log.log(result.error);
+              $log.log(error);
             }
           }
           if (config.errorHandling) {
             _ref = config.errorHandling;
+            _results = [];
             for (_i = 0, _len = _ref.length; _i < _len; _i++) {
               errorHandler = _ref[_i];
-              if (_.contains(errorHandler.msgs, result.error)) {
-                $rootScope.$emit(errorHandler.eventName, {
+              if (_.contains(errorHandler.msgs, error)) {
+                _results.push($rootScope.$emit(errorHandler.eventName, {
                   data: {
-                    error: result.error
+                    error: error
                   }
-                });
+                }));
+              } else {
+                _results.push(void 0);
               }
             }
+            return _results;
+          }
+        };
+        $http.post(config.signApiUrl(opt.resourceId, opt.signType), signage).success(function(result) {
+          var getSignedPolicy, updateSignTypePolicy;
+          signingInProcess = false;
+          if (result && result.error) {
+            handleError(result.error);
+            return defer.reject(result.error);
+          } else {
+            if (config.debugLogging) {
+              $log.log("--- filepicker security sign ---");
+              $log.log(signage.options.call);
+            }
+            updateSignTypePolicy = function() {
+              var cachedType;
+              cachedType = api.cachedPolicies.types[opt.signType];
+              if (_.isUndefined(cachedType)) {
+                api.cachedPolicies.types[opt.signType] = {};
+              }
+              return api.cachedPolicies.types[opt.signType][opt["new"] ? 'new' : 'existing'] = result;
+            };
+            getSignedPolicy = function() {
+              if (opt["new"]) {
+                if (_.isUndefined(opt.signType)) {
+                  return api.cachedPolicies["new"] = result;
+                } else {
+                  return updateSignTypePolicy();
+                }
+              } else {
+                if (_.isUndefined(opt.signType)) {
+                  return api.cachedPolicies.existing = result;
+                } else {
+                  return updateSignTypePolicy();
+                }
+              }
+            };
+            return defer.resolve(getSignedPolicy());
+          }
+        }).error(function(result) {
+          signingInProcess = false;
+          if (result && result.error) {
+            handleError(result.error);
           }
           return defer.reject(result.error);
         });
