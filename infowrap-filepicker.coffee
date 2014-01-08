@@ -366,7 +366,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
 
       options.base64decode = true if opt.base64encode
       options.filename = opt.filename if opt.filename
-      options.mimetype = opt.filename if opt.mimetype
+      options.mimetype = opt.mimetype if opt.mimetype
 
       filepicker.store input, options, (data) ->
         _.extend(result, data: data)
