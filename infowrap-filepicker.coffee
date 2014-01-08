@@ -363,6 +363,10 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
         path: signedPolicy.policy.path
         location:'S3'
 
+
+      options.base64decode = true if opt.base64encode
+      options.filename = opt.filename if opt.filename
+
       filepicker.store input, options, (data) ->
         _.extend(result, data: data)
         $rootScope.safeApply ->
@@ -422,8 +426,7 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
         path: signedPolicy.policy.path
         location:'S3'
 
-      if opt.filename
-        options.filename = opt.filename
+      options.filename = opt.filename if opt.filename
 
       filepicker.storeUrl input, options, (data) ->
         _.extend(result, data: data)

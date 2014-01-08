@@ -369,6 +369,12 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
           path: signedPolicy.policy.path,
           location: 'S3'
         };
+        if (opt.base64encode) {
+          options.base64decode = true;
+        }
+        if (opt.filename) {
+          options.filename = opt.filename;
+        }
         return filepicker.store(input, options, function(data) {
           _.extend(result, {
             data: data
