@@ -408,6 +408,71 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
     };
     /**
     * @doc method
+    * @name infowrapFilepicker.service:infowrapFilepickerService#storeUrl
+    * @methodOf infowrapFilepicker.service:infowrapFilepickerService
+    * @description
+    *
+    * Filepicker's `storeUrl`.
+    *
+    * @param {object} options - see filepicker docs [here](https://developers.inkfilepicker.com/docs/web/#store) to learn more.
+    */
+
+    api.storeUrl = function(input, opt) {
+      var cachedPolicy, defer, signOptions, storeFile;
+      defer = $q.defer();
+      storeFile = function(signedPolicy) {
+        var options, result;
+        result = {
+          input: input
+        };
+        options = {
+          policy: signedPolicy.encoded_policy,
+          signature: signedPolicy.signature,
+          path: signedPolicy.policy.path,
+          location: 'S3'
+        };
+        if (opt.filename) {
+          options.filename = opt.filename;
+        }
+        return filepicker.storeUrl(input, options, function(data) {
+          _.extend(result, {
+            data: data
+          });
+          return $rootScope.safeApply(function() {
+            return defer.resolve(result);
+          });
+        }, function(fperror) {
+          api.log(fperror);
+          _.extend(result, {
+            error: fperror
+          });
+          return $rootScope.safeApply(function() {
+            return defer.reject(result);
+          });
+        });
+      };
+      cachedPolicy = fps.getCachedPolicy({
+        "new": true
+      });
+      if (cachedPolicy) {
+        storeFile(cachedPolicy);
+      } else {
+        signOptions = {
+          "new": true
+        };
+        if (opt.wrapId) {
+          signOptions.wrapId = opt.wrapId;
+        } else if (opt.signType) {
+          signOptions.signType = opt.signType;
+        }
+        fps.sign(signOptions).then(function(signedPolicy) {
+          return storeFile(signedPolicy);
+        });
+      }
+      return defer.promise;
+    };
+    /**
+    * @doc method
     * @name infowrapFilepicker.service:infowrapFilepickerService#export
     * @methodOf infowrapFilepicker.service:infowrapFilepickerService
     * @description

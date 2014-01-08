@@ -401,6 +401,68 @@ infowrapFilepicker.factory("infowrapFilepickerService", ["infowrapFilepicker.con
 
   ###*
   * @doc method
+  * @name infowrapFilepicker.service:infowrapFilepickerService#storeUrl
+  * @methodOf infowrapFilepicker.service:infowrapFilepickerService
+  * @description
+  *
+  * Filepicker's `storeUrl`.
+  *
+  * @param {object} options - see filepicker docs [here](https://developers.inkfilepicker.com/docs/web/#store) to learn more.
+  ###
+  api.storeUrl = (input, opt) ->
+    defer = $q.defer()
+
+    storeFile = (signedPolicy) ->
+      result = input: input
+
+      # assign signed policy first
+      options =
+        policy: signedPolicy.encoded_policy
+        signature: signedPolicy.signature
+        path: signedPolicy.policy.path
+        location:'S3'
+
+      if opt.filename
+        options.filename = opt.filename
+
+      filepicker.storeUrl input, options, (data) ->
+        _.extend(result, data: data)
+        $rootScope.safeApply ->
+          defer.resolve(result)
+
+      , (fperror) ->
+        api.log(fperror)
+        _.extend(result, error: fperror)
+        $rootScope.safeApply ->
+          defer.reject(result)
+
+      # commenting out progress events due to filepicker bug
+      # , (percent) ->
+      #   _.extend(result, progress: percent)
+      #   $rootScope.safeApply ->
+      #     $rootScope.$broadcast(api.events.storeProgress, result)
+
+    # check if a cached policy already exist for this
+    cachedPolicy = fps.getCachedPolicy({new:true})
+    if cachedPolicy
+      storeFile(cachedPolicy)
+    else
+      # no cached policy, sign to get one
+      signOptions =
+        new:true
+
+      if opt.wrapId
+        signOptions.wrapId = opt.wrapId
+      else if opt.signType
+        signOptions.signType = opt.signType
+
+      fps.sign(signOptions).then (signedPolicy) ->
+        storeFile(signedPolicy)
+
+    defer.promise
+
+  ###*
+  * @doc method
   * @name infowrapFilepicker.service:infowrapFilepickerService#export
   * @methodOf infowrapFilepicker.service:infowrapFilepickerService
   * @description
