@@ -375,6 +375,9 @@ infowrapFilepicker.factory("infowrapFilepickerService", [
         if (opt.filename) {
           options.filename = opt.filename;
         }
+        if (opt.mimetype) {
+          options.mimetype = opt.filename;
+        }
         return filepicker.store(input, options, function(data) {
           _.extend(result, {
             data: data
