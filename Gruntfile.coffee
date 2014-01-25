@@ -12,6 +12,7 @@ module.exports = (grunt) ->
     grunt.log.writeln "Express server listening on port 8000"
     require("./lib/app-server.js").listen 8000
     require("child_process").exec "open \"http://localhost:8000\""
+    grunt.task.run ["watch"]
 
   # Print a timestamp (useful for when watching)
   grunt.registerTask "timestamp", ->
