@@ -1,12 +1,13 @@
 var ExampleApp = angular.module("ExampleApp", ["infowrapFilepicker"]);
 
-ExampleApp.value("infowrapFilepicker.config", {
-    apiKey: "AQixW1s8yRrqymYokyC3Oz",
+ExampleApp.config(["fpConfigProvider", function(config) {
+  config.setApiKey("AQixW1s8yRrqymYokyC3Oz")
+  config.setDebug(true)
+  config.setSecurity(false)
+  config.setOptions({
     iframeContainer:'filepicker-modal-container',
     isMobile:false,
     loadProtocol:'https:',
-    debugLogging:true,
-    useSecurity:false,
     signApiUrl:function(resourceId) {
       return "http://yourserver.com/wraps/" + resourceId + "/file_assets/sign.json";
     },
@@ -16,8 +17,8 @@ ExampleApp.value("infowrapFilepicker.config", {
       maxSize: 2000 * 1024 * 1024,
       services: ['COMPUTER', 'FACEBOOK', 'DROPBOX', 'BOX', 'GMAIL', 'GOOGLE_DRIVE', 'IMAGE_SEARCH', 'URL', 'INSTAGRAM', 'EVERNOTE', 'FLICKR', 'FTP', 'GITHUB',  'PICASA', 'WEBCAM', 'WEBDAV']
     }
-  }
-);
+  });
+}]);
 
 ExampleApp.run(function($rootScope, infowrapFilepickerService) {
   $rootScope.modalClose = function() {
