@@ -1,7 +1,7 @@
 {
   "name": "infowrap-filepicker",
   "version": "0.3.6",
-  "main": "infowrap-filepicker.js",
+  "main": "build/infowrap-filepicker.js",
   "ignore": [
     "**/.*",
     "node_modules",
