@@ -1172,11 +1172,7 @@ infowrapFilepicker.directive("filepickerBtn", [
             return processFiles(_.isArray(fpfiles) ? fpfiles : [fpfiles]);
           };
           return $rootScope.safeApply(function() {
-            if (scope.storeLocation) {
-              return fp.pickAndStore(options).then(pickedFiles);
-            } else {
-              return fp.pick(options).then(pickedFiles);
-            }
+            return fp.pickAndStore(options).then(pickedFiles);
           });
         };
         if (config.security()) {
