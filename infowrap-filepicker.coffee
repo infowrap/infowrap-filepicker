@@ -336,6 +336,7 @@ infowrapFilepicker.provider "infowrapFilepickerService", ->
       storeOptions =
         location:'S3'
         path:opt.path
+        access: 'public'
 
       filepicker.pickAndStore(opt, storeOptions, onSuccess, onError)
 
@@ -397,6 +398,7 @@ infowrapFilepicker.provider "infowrapFilepickerService", ->
           signature: signedPolicy.signature
           path: signedPolicy.policy.path
           location:'S3'
+          access: 'public'
 
 
         options.base64decode = true if opt.base64encode
@@ -461,6 +463,7 @@ infowrapFilepicker.provider "infowrapFilepickerService", ->
           signature: signedPolicy.signature
           path: signedPolicy.policy.path
           location:'S3'
+          access: 'public'
 
         options.filename = opt.filename if opt.filename
 

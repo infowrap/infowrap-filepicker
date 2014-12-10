@@ -344,7 +344,8 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
           };
           storeOptions = {
             location: 'S3',
-            path: opt.path
+            path: opt.path,
+            access: 'public'
           };
           filepicker.pickAndStore(opt, storeOptions, onSuccess, onError);
           $timeout(function() {
@@ -404,7 +405,8 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
               policy: signedPolicy.encoded_policy,
               signature: signedPolicy.signature,
               path: signedPolicy.policy.path,
-              location: 'S3'
+              location: 'S3',
+              access: 'public'
             };
             if (opt.base64encode) {
               options.base64decode = true;
@@ -475,7 +477,8 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
               policy: signedPolicy.encoded_policy,
               signature: signedPolicy.signature,
               path: signedPolicy.policy.path,
-              location: 'S3'
+              location: 'S3',
+              access: 'public'
             };
             if (opt.filename) {
               options.filename = opt.filename;
