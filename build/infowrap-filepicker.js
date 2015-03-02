@@ -1167,6 +1167,11 @@ infowrapFilepicker.directive("filepickerBtn", [
               services: scope.services.split(',')
             });
           }
+          if (scope.services && scope.services.indexOf('CUSTOMSOURCE') != -1) {
+            _.extend(options, {
+              openTo: 'CUSTOMSOURCE'
+            });
+          }
           pickedFiles = function(fpfiles) {
             fp.log(fpfiles);
             return processFiles(_.isArray(fpfiles) ? fpfiles : [fpfiles]);
