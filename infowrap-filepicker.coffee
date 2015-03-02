@@ -1071,6 +1071,7 @@ infowrapFilepicker.directive("filepickerBtn", ["fpConfig", "infowrapFilepickerSe
         _.extend(options, {multiple: false}) if scope.multiple is 'false' # explicitly set to false
         _.extend(options, {maxSize: Number(scope.maxSize)}) if scope.maxSize
         _.extend(options, {services: scope.services.split(',')}) if scope.services
+        _.extend(options, {openTo: 'CUSTOMSOURCE'}) if scope.services and scope.services.indexOf('CUSTOMSOURCE') != -1
 
         # cause the filepicker modal to appear
         pickedFiles = (fpfiles) ->
