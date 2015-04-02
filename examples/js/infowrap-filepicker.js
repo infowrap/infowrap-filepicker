@@ -401,11 +401,15 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
               input: input
             };
             options = {
-              policy: signedPolicy.encoded_policy,
-              signature: signedPolicy.signature,
-              path: signedPolicy.policy.path,
               location: 'S3'
             };
+            if (config.security()) {
+              options.policy = signedPolicy.encoded_policy;
+              options.signature = signedPolicy.signature;
+              options.path = signedPolicy.policy.path;
+            } else {
+              options.path = opt.path;
+            }
             if (opt.base64encode) {
               options.base64decode = true;
             }
@@ -432,23 +436,27 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
               });
             });
           };
-          cachedPolicy = fps.getCachedPolicy({
-            "new": true
-          });
-          if (cachedPolicy) {
-            storeFile(cachedPolicy);
-          } else {
-            signOptions = {
+          if (config.security()) {
+            cachedPolicy = fps.getCachedPolicy({
               "new": true
-            };
-            if (opt.wrapId) {
-              signOptions.wrapId = opt.wrapId;
-            } else if (opt.signType) {
-              signOptions.signType = opt.signType;
-            }
-            fps.sign(signOptions).then(function(signedPolicy) {
-              return storeFile(signedPolicy);
             });
+            if (cachedPolicy) {
+              storeFile(cachedPolicy);
+            } else {
+              signOptions = {
+                "new": true
+              };
+              if (opt.wrapId) {
+                signOptions.wrapId = opt.wrapId;
+              } else if (opt.signType) {
+                signOptions.signType = opt.signType;
+              }
+              fps.sign(signOptions).then(function(signedPolicy) {
+                return storeFile(signedPolicy);
+              });
+            }
+          } else {
+            storeFile();
           }
           return defer.promise;
         };
