@@ -114,7 +114,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
           var checkIfLoaded, configuredProtocol, defer;
           defer = $q.defer();
           configuredProtocol = config.options().loadProtocol || "";
-          $('body').append("<script type=\"text/javascript\" src=\"" + configuredProtocol + "//api.filepicker.io/v1/filepicker.js\"></script>");
+          $('body').append("<script type=\"text/javascript\" src=\"" + configuredProtocol + "//api.filepicker.io/v2/filepicker.js\"></script>");
           checkIfLoaded = function() {
             if (_.isUndefined($window.filepicker)) {
               return $timeout(function() {
