@@ -114,7 +114,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
           var checkIfLoaded, configuredProtocol, defer;
           defer = $q.defer();
           configuredProtocol = config.options().loadProtocol || "";
-          $('body').append("<script type=\"text/javascript\" src=\"" + configuredProtocol + "//api.filepicker.io/v1/filepicker.js\"></script>");
+          $('body').append("<script type=\"text/javascript\" src=\"" + configuredProtocol + "//api.filepicker.io/v2/filepicker.js\"></script>");
           checkIfLoaded = function() {
             if (_.isUndefined($window.filepicker)) {
               return $timeout(function() {
@@ -1171,6 +1171,12 @@ infowrapFilepicker.directive("filepickerBtn", [
             _.extend(options, {
               services: scope.services.split(',')
             });
+          }
+          options.imageQuality = 80;
+          if (config.options().isMobile) {
+            options.imageMax = [800, 800];
+          } else {
+            options.imageMax = [1500, 1500];
           }
           pickedFiles = function(fpfiles) {
             fp.log(fpfiles);

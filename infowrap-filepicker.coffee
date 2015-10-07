@@ -102,7 +102,7 @@ infowrapFilepicker.provider "infowrapFilepickerService", ->
       defer = $q.defer()
       # Configure a specific protocol to use or fallback to using whatever protocol this is being hosted from
       configuredProtocol = config.options().loadProtocol or ""
-      $('body').append("<script type=\"text/javascript\" src=\"#{configuredProtocol}//api.filepicker.io/v1/filepicker.js\"></script>")
+      $('body').append("<script type=\"text/javascript\" src=\"#{configuredProtocol}//api.filepicker.io/v2/filepicker.js\"></script>")
       checkIfLoaded = ->
         if _.isUndefined($window.filepicker)
           $timeout ->
@@ -1075,6 +1075,11 @@ infowrapFilepicker.directive("filepickerBtn", ["fpConfig", "infowrapFilepickerSe
         _.extend(options, {multiple: false}) if scope.multiple is 'false' # explicitly set to false
         _.extend(options, {maxSize: Number(scope.maxSize)}) if scope.maxSize
         _.extend(options, {services: scope.services.split(',')}) if scope.services
+        options.imageQuality = 80
+        if config.options().isMobile
+          options.imageMax = [800,800]
+        else
+          options.imageMax = [1500,1500]
 
         # cause the filepicker modal to appear
         pickedFiles = (fpfiles) ->
