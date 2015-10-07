@@ -1074,7 +1074,11 @@ infowrapFilepicker.directive("filepickerBtn", ["fpConfig", "infowrapFilepickerSe
         _.extend(options, {mimetypes: scope.mimeTypes.split(',')}) if scope.mimeTypes
         _.extend(options, {multiple: false}) if scope.multiple is 'false' # explicitly set to false
         _.extend(options, {maxSize: Number(scope.maxSize)}) if scope.maxSize
-        _.extend(options, {services: scope.services.split(',')}) if scope.services
+        if scope.services
+          _.extend(options, {services: scope.services.split(',')})
+        else
+          _.extend(options, config.options().pickOptions)
+
         options.imageQuality = 80
         if config.options().isMobile
           options.imageMax = [800,800]

@@ -1171,6 +1171,8 @@ infowrapFilepicker.directive("filepickerBtn", [
             _.extend(options, {
               services: scope.services.split(',')
             });
+          } else {
+            _.extend(options, config.options().pickOptions);
           }
           options.imageQuality = 80;
           if (config.options().isMobile) {
