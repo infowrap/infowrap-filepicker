@@ -396,7 +396,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
           var cachedPolicy, defer, signOptions, storeFile;
           defer = $q.defer();
           storeFile = function(signedPolicy) {
-            var options, result;
+            var options, percentDispatch, percentProgress, result;
             result = {
               input: input
             };
@@ -419,6 +419,12 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
             if (opt.mimetype) {
               options.mimetype = opt.mimetype;
             }
+            percentProgress = function(percent) {
+              return $rootScope.safeApply(function() {
+                return $rootScope.$broadcast(api.events.storeProgress, percent);
+              });
+            };
+            percentDispatch = _.throttle(percentProgress, 400);
             return filepicker.store(input, options, function(data) {
               _.extend(result, {
                 data: data
@@ -434,7 +440,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
               return $rootScope.safeApply(function() {
                 return defer.reject(result);
               });
-            });
+            }, percentDispatch);
           };
           if (config.security()) {
             cachedPolicy = fps.getCachedPolicy({

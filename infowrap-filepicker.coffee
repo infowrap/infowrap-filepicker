@@ -407,6 +407,11 @@ infowrapFilepicker.provider "infowrapFilepickerService", ->
         options.filename = opt.filename if opt.filename
         options.mimetype = opt.mimetype if opt.mimetype
 
+        percentProgress = (percent) ->
+          $rootScope.safeApply ->
+            $rootScope.$broadcast(api.events.storeProgress, percent)
+        percentDispatch = _.throttle(percentProgress, 400)
+
         filepicker.store input, options, (data) ->
           _.extend(result, data: data)
           $rootScope.safeApply ->
@@ -417,6 +422,7 @@ infowrapFilepicker.provider "infowrapFilepickerService", ->
           _.extend(result, error: fperror)
           $rootScope.safeApply ->
             defer.reject(result)
+        , percentDispatch
 
         # commenting out progress events due to filepicker bug
         # , (percent) ->
