@@ -157,7 +157,7 @@ infowrapFilepicker.provider "infowrapFilepickerService", ->
       api.events[event] = "#{eventPrefix}:" + event
 
       # build service interface
-      if _.contains(apiMethods, event)
+      if _.includes(apiMethods, event)
         # if valid api method, mock the implementation (full implementations added below)
         api[event] = ->
           api.log("#{event} needs implementation!", "error")
@@ -845,7 +845,7 @@ infowrapFilepicker.provider "infowrapFilepickerSecurity", ->
         operations = getOperations(opt.new)
         # check if operation requested already has a valid policy cached
         isCached = _.find cachedPolicy.policy.call, (operation) ->
-          _.contains(operations, operation)
+          _.includes(operations, operation)
         if isCached and cachedPolicy.policy.expiry
           # check the expiration
           rightNowEpoch = Math.floor(new Date().getTime() / 1000)
@@ -889,7 +889,7 @@ infowrapFilepicker.provider "infowrapFilepickerSecurity", ->
           if config.options().errorHandling
             # check all errors that need to be handled
             for errorHandler in config.options().errorHandling
-              if _.contains errorHandler.msgs, error
+              if _.includes errorHandler.msgs, error
                 $rootScope.$emit errorHandler.eventName,
                   data:
                     error: error

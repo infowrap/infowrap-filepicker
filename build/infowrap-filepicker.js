@@ -161,7 +161,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
         });
         _.forEach(allEvents, function(event) {
           api.events[event] = ("" + eventPrefix + ":") + event;
-          if (_.contains(apiMethods, event)) {
+          if (_.includes(apiMethods, event)) {
             return api[event] = function() {
               return api.log("" + event + " needs implementation!", "error");
             };
@@ -897,7 +897,7 @@ infowrapFilepicker.provider("infowrapFilepickerSecurity", function() {
           if (cachedPolicy && cachedPolicy.policy) {
             operations = getOperations(opt["new"]);
             isCached = _.find(cachedPolicy.policy.call, function(operation) {
-              return _.contains(operations, operation);
+              return _.includes(operations, operation);
             });
             if (isCached && cachedPolicy.policy.expiry) {
               rightNowEpoch = Math.floor(new Date().getTime() / 1000);
@@ -952,7 +952,7 @@ infowrapFilepicker.provider("infowrapFilepickerSecurity", function() {
                 _results = [];
                 for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                   errorHandler = _ref[_i];
-                  if (_.contains(errorHandler.msgs, error)) {
+                  if (_.includes(errorHandler.msgs, error)) {
                     _results.push($rootScope.$emit(errorHandler.eventName, {
                       data: {
                         error: error
