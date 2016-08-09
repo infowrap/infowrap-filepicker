@@ -1152,9 +1152,9 @@ infowrapFilepicker.directive("filepickerBtn", [
               mimetypes: scope.mimeTypes.split(',')
             });
           }
-          if (scope.multiple === 'false') {
+          if (scope.multiple) {
             _.extend(options, {
-              multiple: false
+              multiple: scope.multiple
             });
           }
           if (scope.maxSize) {
