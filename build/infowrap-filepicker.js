@@ -175,7 +175,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
         preparePickOptions = function(opt) {
           var options;
           opt = opt || {};
-          opt.multiple = opt.hasOwnProperty('multiple') ? opt.multiple : true;
+          opt.multiple = opt.hasOwnProperty('multiple') ? opt.multiple : false;
           options = _.clone(pickOptions, true);
           _.extend(options, opt);
           return options;
