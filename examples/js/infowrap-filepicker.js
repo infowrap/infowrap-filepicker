@@ -114,7 +114,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
           var checkIfLoaded, configuredProtocol, defer;
           defer = $q.defer();
           configuredProtocol = config.options().loadProtocol || "";
-          $('body').append("<script type=\"text/javascript\" src=\"" + configuredProtocol + "//api.filepicker.io/v1/filepicker.js\"></script>");
+          $('body').append("<script type=\"text/javascript\" src=\"" + configuredProtocol + "//api.filepicker.io/v2/filepicker.js\"></script>");
           checkIfLoaded = function() {
             if (_.isUndefined($window.filepicker)) {
               return $timeout(function() {
@@ -161,7 +161,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
         });
         _.forEach(allEvents, function(event) {
           api.events[event] = ("" + eventPrefix + ":") + event;
-          if (_.contains(apiMethods, event)) {
+          if (_.includes(apiMethods, event)) {
             return api[event] = function() {
               return api.log("" + event + " needs implementation!", "error");
             };
@@ -344,7 +344,8 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
           };
           storeOptions = {
             location: 'S3',
-            path: opt.path
+            path: opt.path,
+            access: 'public'
           };
           filepicker.pickAndStore(opt, storeOptions, onSuccess, onError);
           $timeout(function() {
@@ -404,7 +405,8 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
               policy: signedPolicy.encoded_policy,
               signature: signedPolicy.signature,
               path: signedPolicy.policy.path,
-              location: 'S3'
+              location: 'S3',
+              access: 'public'
             };
             if (opt.base64encode) {
               options.base64decode = true;
@@ -475,7 +477,8 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
               policy: signedPolicy.encoded_policy,
               signature: signedPolicy.signature,
               path: signedPolicy.policy.path,
-              location: 'S3'
+              location: 'S3',
+              access: 'public'
             };
             if (opt.filename) {
               options.filename = opt.filename;
@@ -883,7 +886,7 @@ infowrapFilepicker.provider("infowrapFilepickerSecurity", function() {
           if (cachedPolicy && cachedPolicy.policy) {
             operations = getOperations(opt["new"]);
             isCached = _.find(cachedPolicy.policy.call, function(operation) {
-              return _.contains(operations, operation);
+              return _.includes(operations, operation);
             });
             if (isCached && cachedPolicy.policy.expiry) {
               rightNowEpoch = Math.floor(new Date().getTime() / 1000);
@@ -938,7 +941,7 @@ infowrapFilepicker.provider("infowrapFilepickerSecurity", function() {
                 _results = [];
                 for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                   errorHandler = _ref[_i];
-                  if (_.contains(errorHandler.msgs, error)) {
+                  if (_.includes(errorHandler.msgs, error)) {
                     _results.push($rootScope.$emit(errorHandler.eventName, {
                       data: {
                         error: error
@@ -1162,6 +1165,11 @@ infowrapFilepicker.directive("filepickerBtn", [
           if (scope.services) {
             _.extend(options, {
               services: scope.services.split(',')
+            });
+          }
+          if (scope.services && scope.services.indexOf('CUSTOMSOURCE') !== -1) {
+            _.extend(options, {
+              openTo: 'CUSTOMSOURCE'
             });
           }
           pickedFiles = function(fpfiles) {

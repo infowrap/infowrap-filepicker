@@ -175,7 +175,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
         preparePickOptions = function(opt) {
           var options;
           opt = opt || {};
-          opt.multiple = opt.hasOwnProperty('multiple') ? opt.multiple : false;
+          opt.multiple = opt.hasOwnProperty('multiple') ? opt.multiple : true;
           options = _.clone(pickOptions, true);
           _.extend(options, opt);
           return options;
@@ -886,7 +886,7 @@ infowrapFilepicker.provider("infowrapFilepickerSecurity", function() {
           if (cachedPolicy && cachedPolicy.policy) {
             operations = getOperations(opt["new"]);
             isCached = _.find(cachedPolicy.policy.call, function(operation) {
-              return _.contains(operations, operation);
+              return _.includes(operations, operation);
             });
             if (isCached && cachedPolicy.policy.expiry) {
               rightNowEpoch = Math.floor(new Date().getTime() / 1000);
@@ -941,7 +941,7 @@ infowrapFilepicker.provider("infowrapFilepickerSecurity", function() {
                 _results = [];
                 for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                   errorHandler = _ref[_i];
-                  if (_.contains(errorHandler.msgs, error)) {
+                  if (_.includes(errorHandler.msgs, error)) {
                     _results.push($rootScope.$emit(errorHandler.eventName, {
                       data: {
                         error: error
@@ -1152,9 +1152,9 @@ infowrapFilepicker.directive("filepickerBtn", [
               mimetypes: scope.mimeTypes.split(',')
             });
           }
-          if (scope.multiple) {
+          if (scope.multiple === 'false') {
             _.extend(options, {
-              multiple: scope.multiple
+              multiple: false
             });
           }
           if (scope.maxSize) {
@@ -1167,7 +1167,7 @@ infowrapFilepicker.directive("filepickerBtn", [
               services: scope.services.split(',')
             });
           }
-          if (scope.services && scope.services.indexOf('CUSTOMSOURCE') != -1) {
+          if (scope.services && scope.services.indexOf('CUSTOMSOURCE') !== -1) {
             _.extend(options, {
               openTo: 'CUSTOMSOURCE'
             });
@@ -1177,7 +1177,11 @@ infowrapFilepicker.directive("filepickerBtn", [
             return processFiles(_.isArray(fpfiles) ? fpfiles : [fpfiles]);
           };
           return $rootScope.safeApply(function() {
-            return fp.pickAndStore(options).then(pickedFiles);
+            if (scope.storeLocation) {
+              return fp.pickAndStore(options).then(pickedFiles);
+            } else {
+              return fp.pick(options).then(pickedFiles);
+            }
           });
         };
         if (config.security()) {
