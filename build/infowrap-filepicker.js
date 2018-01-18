@@ -161,7 +161,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
         });
         _.forEach(allEvents, function(event) {
           api.events[event] = ("" + eventPrefix + ":") + event;
-          if (_.contains(apiMethods, event)) {
+          if (_.includes(apiMethods, event)) {
             return api[event] = function() {
               return api.log("" + event + " needs implementation!", "error");
             };
