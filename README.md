@@ -3,8 +3,8 @@
 Hello fellow developer. I see you've discovered this package. And, well, it's old. Here's what I've found out:
 
 - Grunt hasn't aged all that well and the uglifier breaks the build.
-- Since Teachable always minifies JavaScript in the main app and since the bower entrypoint here is the non-minified file, I just removed uglify altogether.
-- In order to run the build install, run `npm install`, `npm install -g grunt`, `grunt build` or `grunt watch`.
+- Unfortunately the Fedora repo requires the .min file on the other end.
+- So I'm creating a .min.js file that's not actually minified. This makes it work and minification happens in the main app anyway.
 
 Good luck, hopefully we can just delete this repo someday.
 
