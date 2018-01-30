@@ -5,15 +5,7 @@ module.exports = (grunt) ->
   # this is a fork of docular so it does not start with 'grunt-'
   grunt.loadNpmTasks('docular')
 
-  grunt.registerTask("build", [
-    "clean",
-    "coffee:dev",
-    "copy:example",
-    "copy:build",
-    "uglify",
-    "server",
-    "watch:coffee"
-  ])
+  grunt.registerTask("build", ["clean", "coffee:dev", "uglify", "copy:example", "copy:build", "server", "watch:coffee"])
 
   # PREVIEW SERVERS
   grunt.registerTask "server", "preview server", ->
@@ -35,7 +27,7 @@ module.exports = (grunt) ->
     copy:
       example:
         files: [
-          dest: "examples/js"
+          dest: "examples/js/"
           src: ["infowrap-filepicker.js", "infowrap-filepicker.min.js"]
         ]
 
