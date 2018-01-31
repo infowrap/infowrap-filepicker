@@ -368,7 +368,7 @@ infowrapFilepicker.provider("infowrapFilepickerService", function() {
           var cleanUrl, defer;
           defer = $q.defer();
           opt = opt || {};
-          cleanUrl = _.first(url.split('?'));
+          cleanUrl = _.head(url.split('?'));
           api.log(cleanUrl);
           filepicker.writeUrl(targetFpFile, cleanUrl, opt, function(fpfile) {
             return $rootScope.safeApply(function() {
@@ -1177,11 +1177,7 @@ infowrapFilepicker.directive("filepickerBtn", [
             return processFiles(_.isArray(fpfiles) ? fpfiles : [fpfiles]);
           };
           return $rootScope.safeApply(function() {
-            if (scope.storeLocation) {
-              return fp.pickAndStore(options).then(pickedFiles);
-            } else {
-              return fp.pick(options).then(pickedFiles);
-            }
+            return fp.pickAndStore(options).then(pickedFiles);
           });
         };
         if (config.security()) {

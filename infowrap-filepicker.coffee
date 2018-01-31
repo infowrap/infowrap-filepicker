@@ -1079,11 +1079,7 @@ infowrapFilepicker.directive("filepickerBtn", ["fpConfig", "infowrapFilepickerSe
           processFiles(if _.isArray(fpfiles) then fpfiles else [fpfiles])
 
         $rootScope.safeApply ->
-          if scope.storeLocation
-            # go ahead and store immediately after the pick
-            fp.pickAndStore(options).then(pickedFiles)
-          else
-            fp.pick(options).then(pickedFiles)
+          return fp.pickAndStore(options).then(pickedFiles)
 
       if config.security()
         # check if a cached policy already exist for this
