@@ -361,7 +361,7 @@ infowrapFilepicker.provider "infowrapFilepickerService", ->
     api.writeUrl = (targetFpFile, url, opt) ->
       defer = $q.defer()
       opt = opt or {}
-      cleanUrl = _.first(url.split('?'))
+      cleanUrl = _.head(url.split('?'))
       api.log(cleanUrl)
 
       filepicker.writeUrl targetFpFile, cleanUrl, opt, (fpfile) ->
