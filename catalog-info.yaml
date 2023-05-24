@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: infowrap-filepicker
+  namespace: usefedora
+  description: ''
+  tags: []
+  annotations:
+    github.com/project-slug: Hotmart-Org/infowrap-filepicker
+    backstage.io/techdocs-ref: dir:.
+  links: []
+spec:
+  type: service
+  lifecycle: production
+  owner: Platform enablement - EE
+  heimdall:
+    reportable: false
+    pci: false
+    products: []
+    squads: []
+    impact: ''
