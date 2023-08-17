@@ -6,13 +6,13 @@ metadata:
   description: ''
   tags: []
   annotations:
-    github.com/project-slug: Hotmart-Org/infowrap-filepicker
+    github.com/project-slug: UseFedora/infowrap-filepicker
     backstage.io/techdocs-ref: dir:.
   links: []
 spec:
   type: service
   lifecycle: production
-  owner: Platform enablement - EE
+  owner: Platform Enablement
   heimdall:
     reportable: false
     pci: false
